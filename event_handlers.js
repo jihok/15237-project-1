@@ -7,6 +7,10 @@ function onKeyDown(event) {
 	else if (event.keyCode === 39) {
 		key_pressed_right = true;
 	}
+	else if (event.keyCode === 82) {
+		clearInterval(intervalId);
+		init();
+	}
 	
 	//makes the player jump. The velocity check makes it 
 	//so you cannot jump in mid air, only while resting.

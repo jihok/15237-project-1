@@ -11,6 +11,23 @@ function Platform(x, y, width) {
 	this.height = platform_height;
 }
 
+function Enemy(x, y, width) {
+	this.x = x + 5 + Math.floor(Math.random()*(width - enemy_width - 5));
+	
+	this.y = y - enemy_height;
+	this.left = x;
+	this.right = x+width;
+	if (Math.random() > .5) {
+		this.vx = enemy_speed;
+	}
+	else {
+		this.vx = -enemy_speed;
+	}
+	this.vy = 0;
+	this.width = enemy_width;
+	this.height = enemy_height;
+}
+
 function Explosion(x,y) {
 	this.x = x;
 	this.y = y;

@@ -7,10 +7,21 @@ function init() {
 	canvas.addEventListener('keyup', onKeyUp, false);
 	canvas.addEventListener('keydown', onKeyDown, false);
 	canvas.addEventListener('mousedown', onMouseDown, false);
+	enemy_list = [];
+	projectile = [];
+	explosion = [];
+	platform = [];
 	player_init(); //initializes player attributes
 	platform_init(); //creates platform objects. For now, is hardcoded, perhaps add randomization later
+	enemy_init();
+	lava.y = 500;
+	lava.vy = -.05;
+	r_y = 0;
+	death_flag = false;
+	victory_flag = false;
 	canvas.setAttribute('tabindex','0'); 
 	canvas.focus();
+	
 	intervalId = setInterval(update, timerDelay); //starts the timer
 }
 
@@ -38,13 +49,27 @@ function platform_init() {
 
 //creates enemy objects, to be finished later
 function enemy_init() {
-
+	var i = 0;
+	while (i < platform.length) {
+		if (platform[i].y < 390) { //tihs is just so it doesnt spawn on base platform which is annoying
+			enemy_list.push(new Enemy(platform[i].x, platform[i].y, platform[i].width));
+		}
+		i++;
+	}
 }
 
 //equivalent of onTimer. this is what we do every "tick". 
 //Currently code is rather complicated and maybe should be
 //separated into helper functions. 
 function update() { 
+	if (death_flag) { 
+		alert("died");
+		clearInterval(intervalId);
+	}
+	if (victory_flag) {
+		alert("victory");
+		clearInterval(intervalId);
+	}
 	var i = 0; //just a variable for traversing indices
 	
 	//movement is done indirectly by giving a player acceleration. 
@@ -70,13 +95,15 @@ function update() {
 	//check collisions with platforms
 	player_platform_collision_handler();
 	
+	player_enemy_collision_handler();
+	
 	//friction
 	if (player.vy === 0) {
 		player.vx -= (player.vx * .04)
 	}
 	lava.y += lava.vy;
 	if (lava.y <= player.y + player.height) {
-		alert("died");
+		death_flag = true;
 	}
 	update_projectiles();
 	detect_projectile_collision();
@@ -85,13 +112,38 @@ function update() {
 		lastFired++;
 	}
 	
-	if (player.y + r_y < threshold) {
+	if (player.y + r_y < threshold_up) {
 		r_y++;
 	}
-	
+	else if (player.y + r_y > threshold_down) {
+		r_y--;
+	}
+	update_enemies();
 	draw();
 }
 
+function update_enemies() {
+	var i = 0;
+	while (i < enemy_list.length) {
+		if (enemy_list[i].x <= enemy_list[i].left || 
+			(enemy_list[i].x + enemy_list[i].width >= enemy_list[i].right)) {
+			enemy_list[i].vx = -enemy_list[i].vx
+		}
+		enemy_list[i].x += enemy_list[i].vx;
+	i++;
+	}
+}
+
+function player_enemy_collision_handler() {
+	var i = 0;
+	while (i < enemy_list.length) { 
+		if (detect_collision(player, enemy_list[i])) {
+			death_flag = true;
+			break;
+		}
+		i++;
+	}
+}
 
 function update_projectiles() {
 	var i = 0;
@@ -112,6 +164,7 @@ function update_projectiles() {
 function detect_projectile_collision() {
 	var i = 0;
 	var j;
+	var k;
 	var detected = false;
 	while (i < projectile.length) {
 		j = 0;
@@ -119,9 +172,18 @@ function detect_projectile_collision() {
 			if (detect_collision(projectile[i], platform[j])) {
 				//projectile.splice(i, 1);
 				detected = true;
-				handle_projectile_collision(i,j);
+				handle_projectile_platform_collision(i,j);
 			}
 			j++;
+		}
+		k = 0;
+		while (k < enemy_list.length && (detected === false)) {
+			if (detect_collision(projectile[i], enemy_list[k])) {
+				detected = true;
+				handle_projectile_enemy_collision(i,k);
+				console.log('supss');
+			}
+			k++;
 		}
 		if (detected === false) {
 			i++;
@@ -130,7 +192,14 @@ function detect_projectile_collision() {
 	}
 }
 
-function handle_projectile_collision(i,j) {
+function handle_projectile_enemy_collision(i,k) {
+	handle_projectile_platform_collision(i,k); //placeholder code
+	//currently this is identical, but we might want different behavior in the future
+	
+	enemy_list.splice(k,1);
+}
+
+function handle_projectile_platform_collision(i,j) {
 	explosion.push(new Explosion(projectile[i].x, projectile[i].y));
 	projectile.splice(i,1);
 }
@@ -215,8 +284,6 @@ function detect_collision(obj1, obj2) {
 //draws our board
 function draw() {
 	var i = 0;
-	var j = 0;
-	var k = 0;
 	ctx.clearRect(0,0,400,500);
 	ctx.fillStyle = "black";
 	ctx.fillRect(player.x, player.y + r_y, 40,40);
@@ -227,12 +294,14 @@ function draw() {
 	ctx.fillStyle = "red";
 	ctx.fillRect(0, lava.y + r_y, canvas.width, canvas.height - lava.y);
 	ctx.fillRect(player.x, player.y + (player.height/2) + r_y, 40, 2);
-	while (j < projectile.length) {
-		//ctx.fillRect(projectile[j].x, projectile[j].y, projectile_width, projectile_height);
-		ctx.fillRect(projectile[j].x, projectile[j].y + r_y, projectile[j].width, projectile[j].height);
-		j++;
+	i = 0;
+	while (i < projectile.length) {
+		//ctx.fillRect(projectile[i].x, projectile[i].y, projectile_width, projectile_height);
+		ctx.fillRect(projectile[i].x, projectile[i].y + r_y, projectile[i].width, projectile[i].height);
+		i++;
 	}
-	while (k < explosion.length) {
+	i = 0;
+	while (i < explosion.length) {
 		//The following two lines are identical because width/height is always being assigned to
 		//explosion_diameter but for consistency i thought it would be nice s.t. 
 		//all our objects have a width and height, and that we always reference it.
@@ -241,15 +310,21 @@ function draw() {
 		//We subtract half of explosion diameter so that the explosion is centered rather than
 		//simply sharing the same corner as the projectile.
 		
-		//ctx.fillRect(explosion[k].x - explosion_diameter/2, explosion[k].y - explosion_diameter/2, explosion_diameter, explosion_diameter);
-		ctx.fillRect(explosion[k].x - explosion[k].width/2, explosion[k].y - explosion[k].height/2 + r_y, explosion[k].width, explosion[k].height);
-		explosion[k].time +=1;
-		if (explosion[k].time === explosion_timeout) {
-			explosion.splice(k,1);
+		//ctx.fillRect(explosion[i].x - explosion_diameter/2, explosion[i].y - explosion_diameter/2, explosion_diameter, explosion_diameter);
+		ctx.fillRect(explosion[i].x - explosion[i].width/2, explosion[i].y - explosion[i].height/2 + r_y, explosion[i].width, explosion[i].height);
+		explosion[i].time +=1;
+		if (explosion[i].time === explosion_timeout) {
+			explosion.splice(i,1);
 		}
 		else { 
-			k++;
+			i++;
 		}
+	}
+	ctx.fillStyle = "blue";
+	i = 0;
+	while (i < enemy_list.length) {
+		ctx.fillRect(enemy_list[i].x, enemy_list[i].y + r_y, enemy_list[i].width, enemy_list[i].height);
+		i++;
 	}
 }
 

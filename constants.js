@@ -1,9 +1,7 @@
 var player = new Object(); 
-var fireRate = 19;
+var fireRate = 29;
 var lastFired = fireRate + 1;
 var lava = new Object();
-lava.y = 500;
-lava.vy =  -.02;
 var platform = []; //list of platform objects
 var enemy_list = [];
 var projectile = [];
@@ -38,6 +36,17 @@ var projectile_height = 10;
 var projectile_width = 10;
 var projectile_speed = 4;
 var explosion_diameter = 20;
-var recoil = .3; //this is how much velocity the rocket imparts on the player in the opposite direction. 
-var threshold = 60;
+var recoil = .24; //this is how much velocity the rocket imparts on the player in the opposite direction. 
+var threshold_up = 60;
+var threshold_down = 360;
 var r_y = 0;
+var death_flag = false;
+var victory_flag = false;
+
+
+
+//enemy constants
+
+var enemy_height = 10;
+var enemy_width = 10;
+var enemy_speed = 2.3;
