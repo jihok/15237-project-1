@@ -1,7 +1,3 @@
-
-					   
-
-
 //this function is what sets everything in motion
 function init() {
 	canvas.addEventListener('keyup', onKeyUp, false);
@@ -306,7 +302,7 @@ function draw() {
 		i++;
 	}
 	
-	ctx.drawImage(player.img, player.sx, player.sy, player.sWidth, player.sHeight, player.x, player.y, 24, 40);
+	ctx.drawImage(player.img, player.sx, player.sy, player.sWidth, player.sHeight, player.x, player.y + r_y, 20, 40);
 
 	ctx.fillStyle = "red";
 	ctx.fillRect(0, lava.y + r_y, canvas.width, canvas.height - lava.y);
