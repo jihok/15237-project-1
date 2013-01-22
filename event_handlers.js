@@ -11,6 +11,10 @@ function onKeyDown(event) {
 		clearInterval(intervalId);
 		init();
 	}
+	else if (event.keyCode === 73) {
+		alert("toggled invincibility");
+		invinc_flag = !invinc_flag;
+	}
 	
 	//makes the player jump. The velocity check makes it 
 	//so you cannot jump in mid air, only while resting.
@@ -45,7 +49,7 @@ function onKeyUp(event) {
 function onMouseDown(event) {
 	if (lastFired > fireRate) {
 		var x = event.pageX - canvas.offsetLeft
-		var y = event.pageY - canvas.offsetTop;
+		var y = event.pageY - canvas.offsetTop - r_y;
 		var i = projectile.push(new Projectile(x,y)) - 1;
 		player.vx -= recoil*(projectile[i].vx);
 		player.vy -= recoil*(projectile[i].vy);

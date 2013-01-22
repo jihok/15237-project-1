@@ -15,7 +15,7 @@ function init() {
 	platform_init(); //creates platform objects. For now, is hardcoded, perhaps add randomization later
 	enemy_init();
 	lava.y = 500;
-	lava.vy = -.05;
+	lava.vy = -.01;
 	r_y = 0;
 	death_flag = false;
 	victory_flag = false;
@@ -95,8 +95,9 @@ function update() {
 	//check collisions with platforms
 	player_platform_collision_handler();
 	
-	player_enemy_collision_handler();
-	
+	if (!invinc_flag) {
+		player_enemy_collision_handler();
+	}
 	//friction
 	if (player.vy === 0) {
 		player.vx -= (player.vx * .04)
