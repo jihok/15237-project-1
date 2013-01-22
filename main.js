@@ -15,7 +15,7 @@ function init() {
 	platform_init(); //creates platform objects. For now, is hardcoded, perhaps add randomization later
 	enemy_init();
 	lava.y = 500;
-	lava.vy = -.01;
+	lava.vy = -.05;
 	r_y = 0;
 	death_flag = false;
 	victory_flag = false;
@@ -33,6 +33,12 @@ function player_init() {
 	player.y = 360;
 	player.width = 40;
 	player.height = 40;
+	player.img = new Image();
+	player.img.src = "player.png";
+	player.sx = 0;
+	player.sy = 0;
+	player.sWidth = 50;
+	player.sHeight = 103;
 }
 
 //creates our platform objects, hardcoded as of now
@@ -75,10 +81,14 @@ function update() {
 	//movement is done indirectly by giving a player acceleration. 
 	//note you can only accelerate
     if (key_pressed_left && player.vy === 0) {
+		player.sy = 110;
+		player.sx = (player.sx+ 50)%(400);
 		player.vx -= .06;
 		//player.vx = Math.max(player.vx - .06, -1 * max_speed);
 	}
     if (key_pressed_right && player.vy === 0) {
+		player.sy = 0;
+		player.sx = (player.sx+ 50)%(400);
 		player.vx += .06;
 		//player.vx = Math.min(player.vx + .06, max_speed);
     }
@@ -95,9 +105,8 @@ function update() {
 	//check collisions with platforms
 	player_platform_collision_handler();
 	
-	if (!invinc_flag) {
-		player_enemy_collision_handler();
-	}
+	player_enemy_collision_handler();
+	
 	//friction
 	if (player.vy === 0) {
 		player.vx -= (player.vx * .04)
@@ -287,14 +296,17 @@ function draw() {
 	var i = 0;
 	ctx.clearRect(0,0,400,500);
 	ctx.fillStyle = "black";
-	ctx.fillRect(player.x, player.y + r_y, 40,40);
+		//ctx.fillRect(player.x, player.y + r_y, 40,40);
 	while (i < platform.length) {
 		ctx.fillRect(platform[i].x, platform[i].y + r_y, platform[i].width, platform[i].height);
 		i++;
 	}
+	
+	ctx.drawImage(player.img, player.sx, player.sy, player.sWidth, player.sHeight, player.x, player.y, 24, 40);
+
 	ctx.fillStyle = "red";
 	ctx.fillRect(0, lava.y + r_y, canvas.width, canvas.height - lava.y);
-	ctx.fillRect(player.x, player.y + (player.height/2) + r_y, 40, 2);
+	//ctx.fillRect(player.x, player.y + (player.height/2) + r_y, 40, 2);
 	i = 0;
 	while (i < projectile.length) {
 		//ctx.fillRect(projectile[i].x, projectile[i].y, projectile_width, projectile_height);
