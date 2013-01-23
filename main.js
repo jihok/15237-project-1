@@ -39,18 +39,19 @@ function player_init() {
 	player.sy = 0;
 	player.sWidth = 50;
 	player.sHeight = 103;
+	player.i = 0;
 }
 
 //creates our platform objects, hardcoded as of now
 function platform_init() {
-	platform.push(new Platform(100, 320, 100));
-	platform.push(new Platform(0, 260, 100));
-	platform.push(new Platform(200, 200, 100));
-	platform.push(new Platform(0, 400, 400));
-	platform.push(new Platform(80, 140, 100));
-	platform.push(new Platform(0, 80, 100));
-	platform.push(new Platform(200, 20, 100));
-	platform.push(new Platform(80, -20, 100));
+	platform.push(new Platform(0, 400, 400, 0, 0));
+	platform.push(new Platform(100, 320, 100, 50, 20));
+	platform.push(new Platform(0, 260, 100, 35, 10));
+	platform.push(new Platform(200, 200, 100, 20, 40));
+	platform.push(new Platform(80, 140, 100, 0, 70));
+	platform.push(new Platform(0, 80, 100, 20, 20));
+	platform.push(new Platform(200, 20, 100, 30, 30));
+	platform.push(new Platform(80, -20, 100, 50, 20));
 }
 
 //creates enemy objects, to be finished later
@@ -58,7 +59,7 @@ function enemy_init() {
 	var i = 0;
 	while (i < platform.length) {
 		if (platform[i].y < 390) { //tihs is just so it doesnt spawn on base platform which is annoying
-			enemy_list.push(new Enemy(platform[i].x, platform[i].y, platform[i].width));
+			enemy_list.push(new Enemy(platform[i].x, platform[i].y, platform[i].width, i));
 		}
 		i++;
 	}
@@ -92,9 +93,13 @@ function update() {
 		player.vx += .06;
 		//player.vx = Math.min(player.vx + .06, max_speed);
     }
-	player.x += player.vx;
-	player.y += player.vy;
-	
+	console.log(platform[0].vx);
+	player.x += player.vx + platform[player.i].vx;
+	player.y += player.vy + platform[player.i].vy;
+	update_platforms();
+	if (Math.abs(player.vy) >= 2*gravity) {
+		player.i = 0;
+	}
 	//gives constant accleration downwards
 	player.vy += gravity;
 	//player.vy = Math.min(player.vy + gravity, free_fall_speed);
@@ -105,7 +110,9 @@ function update() {
 	//check collisions with platforms
 	player_platform_collision_handler();
 	
-	player_enemy_collision_handler();
+	if (!invinc_flag) {
+		player_enemy_collision_handler();
+	}
 	
 	//friction
 	if (player.vy === 0) {
@@ -132,14 +139,44 @@ function update() {
 	draw();
 }
 
+function update_platforms() {
+	var i =0;
+	var plat;
+	while (i < platform.length) {
+		plat = platform[i];
+		plat.x += plat.vx;
+		plat.y += plat.vy;
+		if (plat.x <= plat.left) {
+			plat.vx = Math.abs(plat.vx);
+		}
+		if (plat.x >= plat.right) {
+			plat.vx = -Math.abs(plat.vx);
+		}
+		if (plat.y + r_y <= plat.up) {
+			plat.vy = Math.abs(plat.vy);
+		}
+		if (plat.y + r_y >= plat.down) {
+			plat.vy = -Math.abs(plat.vy);
+		}
+		i++;
+	}
+}
+
 function update_enemies() {
 	var i = 0;
+	var plat;
+	var enemy;
 	while (i < enemy_list.length) {
-		if (enemy_list[i].x <= enemy_list[i].left || 
-			(enemy_list[i].x + enemy_list[i].width >= enemy_list[i].right)) {
-			enemy_list[i].vx = -enemy_list[i].vx
+		enemy = enemy_list[i];
+		plat = platform[enemy.i];
+		if (enemy.x <= plat.x + 5) {
+			enemy.vx = Math.abs(enemy.vx);
 		}
-		enemy_list[i].x += enemy_list[i].vx;
+		else if (enemy.x + enemy.width >= plat.x + plat.width - 5) {
+			enemy.vx = -Math.abs(enemy.vx);
+		}
+		enemy.x += enemy.vx + plat.vx;
+		enemy.y = plat.y - enemy.height;
 	i++;
 	}
 }
@@ -248,8 +285,10 @@ function player_platform_collision_handler() {
 				} else if (player.y - player.vy + player.height <= platform[i].y) { 
 					player.y = platform[i].y - player.height;
 					player.vy = 0;
+					player.i = i;
+					console.log('fuck');
 				} else  {
-					player.y = platform[i].y + platform[i].height;
+					player.y = player.y - player.vy;//platform[i].y + platform[i].height;
 					player.vy = 0;	
 				}
 			}

@@ -42,7 +42,7 @@ var threshold_down = 360;
 var r_y = 0;
 var death_flag = false;
 var victory_flag = false;
-
+var invinc_flag = false;
 
 
 //enemy constants
