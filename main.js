@@ -376,5 +376,4 @@ function draw() {
 	}
 }
 
->>>>>>> 36ed0e099c0124a6a4441333404b67ca345fd5bf
 init();
