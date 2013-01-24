@@ -11,7 +11,7 @@ function init() {
 	platform_init(); //creates platform objects. For now, is hardcoded, perhaps add randomization later
 	enemy_init();
 	lava.y = 500;
-	lava.vy = -.05;
+	lava.vy = -.01;
 	r_y = 0;
 	death_flag = false;
 	victory_flag = false;
@@ -94,7 +94,7 @@ function update() {
 		else {
 			player.rundelay = 0;
 			player.ri++;
-			console.log(player.ri, player.rundelay);
+			//console.log(player.ri, player.rundelay);
 			if (player.ri === 12)
 				player.ri = 7;
 		}
@@ -110,7 +110,7 @@ function update() {
 		else {
 			player.rundelay = 0;
 			player.ri++;
-			console.log(player.ri, player.rundelay);
+			//console.log(player.ri, player.rundelay);
 			if (player.ri === 6)
 				player.ri = 0;
 		}
@@ -194,12 +194,25 @@ function update_enemies() {
 	while (i < enemy_list.length) {
 		enemy = enemy_list[i];
 		plat = platform[enemy.i];
+		if (enemy.si > 4)
+			enemy.si = 0;
+		if (enemy.sdelay !== 3)
+			enemy.sdelay++;
+		else {
+			enemy.sdelay = 0;
+			enemy.si++;
+			console.log(enemy.si, enemy.sdelay);
+			if (enemy.si === 5)
+				enemy.si = 0;
+		}
+		
 		if (enemy.x <= plat.x + 5) {
 			enemy.vx = Math.abs(enemy.vx);
 		}
 		else if (enemy.x + enemy.width >= plat.x + plat.width - 5) {
 			enemy.vx = -Math.abs(enemy.vx);
 		}
+		
 		enemy.x += enemy.vx + plat.vx;
 		enemy.y = plat.y - enemy.height;
 	i++;
@@ -310,7 +323,7 @@ function player_platform_collision_handler() {
 					player.y = platform[i].y - player.height;
 					player.vy = 0;
 					player.i = i;
-					console.log('fuck');
+					//console.log('fml');
 				} else  {
 					player.y = player.y - player.vy;//platform[i].y + platform[i].height;
 					player.vy = 0;	
@@ -365,6 +378,7 @@ function draw() {
 		i++;
 	}
 	
+	//draw the player
 	ctx.drawImage(player.img, player.runx[player.ri], player.runy[Math.floor(player.ri/7)], 
 					player.runwidth[player.ri], 170, player.x, player.y, 24, 40);
 
@@ -397,10 +411,15 @@ function draw() {
 			i++;
 		}
 	}
+	
+	//draw the enemies
 	ctx.fillStyle = "blue";
 	i = 0;
 	while (i < enemy_list.length) {
-		ctx.fillRect(enemy_list[i].x, enemy_list[i].y + r_y, enemy_list[i].width, enemy_list[i].height);
+		var si = enemy_list[i].si
+		ctx.drawImage(enemy_list[i].img, enemy_list[i].sx[si], 0, 
+					enemy_list[i].sWidth[si], 50, enemy_list[i].x, enemy_list[i].y + r_y, enemy_list[i].width, enemy_list[i].height);
+		//ctx.fillRect(enemy_list[i].x, enemy_list[i].y + r_y, enemy_list[i].width, enemy_list[i].height);
 		i++;
 	}
 }
