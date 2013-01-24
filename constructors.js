@@ -4,7 +4,9 @@ var projectile_speed = 4;
 var explosion_diameter = 20;
 
 //Platform constructor. x is leftmost point. 
-function Platform(x, y, width, horizontal, vertical) { 
+function Platform(x, y, width, horizontal, vertical) {
+	horizontal = 0;
+	vertical = 0;
 	this.x = x;
 	this.y = y;
 	this.width = width;

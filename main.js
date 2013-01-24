@@ -27,15 +27,24 @@ function player_init() {
 	player.vy = 0;
 	player.x = 0;
 	player.y = 360;
-	player.width = 40;
+	player.width = 17; //slightly smaller than actual img to account for player not actually "colliding" with enemy 
 	player.height = 40;
 	player.img = new Image();
-	player.img.src = "player.png";
+	player.img.src = "megaman_run.jpg";
+	player.ri = 0; //0-5 for right, 6-11 for left
+	player.rundelay = 0; //TODO: make this a function of velocity
+	player.runx = [0,150,360,480,360,150, 0,160,280,480,280,160];
+	player.runy = [0, 190];
+	player.runwidth = [150,190,120,160,120,190, 160,100,190,150,190,100];
+	player.runheight = [170, 170];
+	/*
 	player.sx = 0;
 	player.sy = 0;
 	player.sWidth = 50;
 	player.sHeight = 103;
+	*/
 	player.i = 0;
+	
 }
 
 //creates our platform objects, hardcoded as of now
@@ -78,14 +87,34 @@ function update() {
 	//movement is done indirectly by giving a player acceleration. 
 	//note you can only accelerate
     if (key_pressed_left && player.vy === 0) {
-		player.sy = 110;
-		player.sx = (player.sx+ 50)%(400);
+		if (player.ri < 6)
+			player.ri = 6;
+		if (player.rundelay !== 3)
+			player.rundelay++;
+		else {
+			player.rundelay = 0;
+			player.ri++;
+			console.log(player.ri, player.rundelay);
+			if (player.ri === 12)
+				player.ri = 7;
+		}
+		
 		player.vx -= .06;
 		//player.vx = Math.max(player.vx - .06, -1 * max_speed);
 	}
     if (key_pressed_right && player.vy === 0) {
-		player.sy = 0;
-		player.sx = (player.sx+ 50)%(400);
+		if (player.ri > 5)
+			player.ri = 0;
+		if (player.rundelay !== 3)
+			player.rundelay++;
+		else {
+			player.rundelay = 0;
+			player.ri++;
+			console.log(player.ri, player.rundelay);
+			if (player.ri === 6)
+				player.ri = 0;
+		}
+		
 		player.vx += .06;
 		//player.vx = Math.min(player.vx + .06, max_speed);
     }
@@ -266,7 +295,6 @@ function player_platform_collision_handler() {
 	var i = 0;
 	while (i < platform.length) {
 			if (detect_collision(player, platform[i])) { //okay cool we hit a platform.
-			
 				//now have to determine which direction we're hitting it from.
 				/*Note that you can't just undo the change in position
 				because that might leave a small gap between
@@ -337,7 +365,8 @@ function draw() {
 		i++;
 	}
 	
-	ctx.drawImage(player.img, player.sx, player.sy, player.sWidth, player.sHeight, player.x, player.y, 24, 40);
+	ctx.drawImage(player.img, player.runx[player.ri], player.runy[Math.floor(player.ri/7)], 
+					player.runwidth[player.ri], 170, player.x, player.y, 24, 40);
 
 	ctx.fillStyle = "red";
 	ctx.fillRect(0, lava.y + r_y, canvas.width, canvas.height - lava.y);
