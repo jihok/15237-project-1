@@ -35,12 +35,12 @@ function Enemy(x, y, width, i) {
 	this.height = enemy_height;
 	this.img = new Image();
 	this.img.src = "enemy1.png";
-	this.sx = [0,40,80,115,150];
+	this.sx = [0,40,80,115,150, 490,525,565,605,640];
 	this.sy = [0];
-	this.sWidth = [35,30,30,30,30];
+	this.sWidth = [35,30,30,30,30, 30,35,30,30,30];
 	this.sHeight = [50];
 	this.si = 0;
-	this.sdelay = 3;
+	this.sdelay = 0;
 	this.i = i
 }
 

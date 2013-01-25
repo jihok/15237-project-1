@@ -11,7 +11,15 @@ function init() {
 	platform_init(); //creates platform objects. For now, is hardcoded, perhaps add randomization later
 	enemy_init();
 	lava.y = 500;
-	lava.vy = -.01;
+	lava.vy = -.05;
+	lava.img = new Image();
+	lava.img.src = "lava.png";
+	lava.sx = [130, 100];
+	lava.sy = [690, 660];
+	lava.sWidth = [60, 20];
+	lava.sHeight = [10, 40];
+	lava.si = 0;
+	lava.sdelay = 0;
 	r_y = 0;
 	death_flag = false;
 	victory_flag = false;
@@ -118,7 +126,7 @@ function update() {
 		player.vx += .06;
 		//player.vx = Math.min(player.vx + .06, max_speed);
     }
-	console.log(platform[0].vx);
+	//console.log(platform[0].vx);
 	player.x += player.vx + platform[player.i].vx;
 	player.y += player.vy + platform[player.i].vy;
 	update_platforms();
@@ -194,27 +202,29 @@ function update_enemies() {
 	while (i < enemy_list.length) {
 		enemy = enemy_list[i];
 		plat = platform[enemy.i];
-		if (enemy.si > 4)
+		if (enemy.x <= plat.x + 5) {
+			enemy.vx = Math.abs(enemy.vx);
+			enemy.si = 5;
+		}
+		else if (enemy.x + enemy.width >= plat.x + plat.width - 5) {
+			enemy.vx = -Math.abs(enemy.vx);
 			enemy.si = 0;
+		}
+		
+		enemy.x += enemy.vx + plat.vx;
+		enemy.y = plat.y - enemy.height;
 		if (enemy.sdelay !== 3)
 			enemy.sdelay++;
 		else {
 			enemy.sdelay = 0;
 			enemy.si++;
-			console.log(enemy.si, enemy.sdelay);
-			if (enemy.si === 5)
+			//console.log(enemy.si, enemy.sdelay);
+			if (enemy.si === 10 && enemy.vx > 0)
+				enemy.si = 5;
+			else if (enemy.si === 5 && enemy.vx < 0)
 				enemy.si = 0;
+				
 		}
-		
-		if (enemy.x <= plat.x + 5) {
-			enemy.vx = Math.abs(enemy.vx);
-		}
-		else if (enemy.x + enemy.width >= plat.x + plat.width - 5) {
-			enemy.vx = -Math.abs(enemy.vx);
-		}
-		
-		enemy.x += enemy.vx + plat.vx;
-		enemy.y = plat.y - enemy.height;
 	i++;
 	}
 }
@@ -266,7 +276,7 @@ function detect_projectile_collision() {
 			if (detect_collision(projectile[i], enemy_list[k])) {
 				detected = true;
 				handle_projectile_enemy_collision(i,k);
-				console.log('supss');
+				//console.log('supss');
 			}
 			k++;
 		}
@@ -383,7 +393,14 @@ function draw() {
 					player.runwidth[player.ri], 170, player.x, player.y, 24, 40);
 
 	ctx.fillStyle = "red";
+	console.log(canvas.height);
 	ctx.fillRect(0, lava.y + r_y, canvas.width, canvas.height - lava.y);
+	if (lava.y < (canvas.height - lava.sHeight[0])) {
+		ctx.drawImage(lava.img, lava.sx[0], lava.sy[0], lava.sWidth[0], lava.sHeight[0], 20, lava.y, lava.sWidth[0], lava.sHeight[0]);
+	}
+	
+	ctx.drawImage(lava.img, lava.sx[1], lava.sy[1], lava.sWidth[1], lava.sHeight[1], 100, lava.y-lava.sHeight[1], lava.sWidth[1], lava.sHeight[1]);
+	
 	//ctx.fillRect(player.x, player.y + (player.height/2) + r_y, 40, 2);
 	i = 0;
 	while (i < projectile.length) {
