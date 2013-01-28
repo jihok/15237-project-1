@@ -1,11 +1,11 @@
 function onKeyDown(event) {
 	if(game_start === true) {
 		//going left
-	    if (event.keyCode === 37) {
+	    if (event.keyCode === 65) {
 	        key_pressed_left = true;
 	    }
 		//going right
-		else if (event.keyCode === 39) {
+		else if (event.keyCode === 68) {
 			key_pressed_right = true;
 		}
 		else if (event.keyCode === 82) {
@@ -27,7 +27,7 @@ function onKeyDown(event) {
 		//Dw, it's thoroughly tested, double jumping is not possible
 		//since because of float subtraction you will never hit exactly throughout
 		//any fall or jump.
-		else if (event.keyCode === 38 && (player.vy === 0 || player.vy === 0.05)) {
+		else if (event.keyCode === 87 && (player.vy === 0 || player.vy === 0.05)) {
 			player.vy -= 3;
 		}
 	}
@@ -45,10 +45,10 @@ function onKeyDown(event) {
 }
 
 function onKeyUp(event) {
-	if (event.keyCode === 37) {
+	if (event.keyCode === 65) {
 		key_pressed_left = false;
 	}
-	else if (event.keyCode === 39) {
+	else if (event.keyCode === 68) {
 		key_pressed_right = false;
 	}
 }
