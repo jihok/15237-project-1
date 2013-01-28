@@ -38,7 +38,7 @@ function player_init() {
 	player.width = 17; //slightly smaller than actual img to account for player not actually "colliding" with enemy 
 	player.height = 40;
 	player.img = new Image();
-	player.img.src = "megaman_run.jpg";
+	player.img.src = "megaman_run.png";
 	player.ri = 0; //0-5 for right, 6-11 for left
 	player.rundelay = 0; //TODO: make this a function of velocity
 	player.runx = [0,150,360,480,360,150, 0,160,280,480,280,160];
@@ -57,7 +57,7 @@ function player_init() {
 
 //creates our platform objects, hardcoded as of now
 function platform_init() {
-	platform.push(new Platform(0, 400, 400, 0, 0));
+	platform.push(new Platform(0, 400, 400, 10, 0));
 	platform.push(new Platform(100, 320, 100, 50, 20));
 	platform.push(new Platform(0, 260, 100, 35, 10));
 	platform.push(new Platform(200, 200, 100, 20, 40));

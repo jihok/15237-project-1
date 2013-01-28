@@ -1,7 +1,7 @@
 15237-project-1
 ===============
 added: platforms. these are simply hardcoded for now. Constructor takes x,y coordinates for upper left corner, and width. 
-height is same for all, se tat 4
+height is same for all, set at 4
 
 added: player. just a black box, no graphics
 
@@ -39,16 +39,17 @@ Downward scrolling would be easy to implement but not sure if we just want playe
 
 to be done: 
 
-*enemies(!) and enemy/player/projectile interactions
+Deanna:
+	*projectile and lava animations
+	*background image
+	*dynamic barriers on platforms
 
-*moving platforms
+Jiho:
+	*menu
+	*victory
+	
+Norbert:
 
-*dynamic barriers on platforms
-
-*menu
-
-*victory
+*enemy speedup and move towards player
 
 *randomly generated platform method
-
-*graphics(!)

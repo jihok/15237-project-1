@@ -48,6 +48,6 @@ var invinc_flag = false;
 //enemy constants
 
 var enemy_height = 40;
-var enemy_width = 40;
-var enemy_speed = 1.0;
+var enemy_width = 30;
+var enemy_speed = 0.5;
 //var enemy_speed = 2.3;
