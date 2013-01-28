@@ -45,12 +45,13 @@ var victory_flag = false;
 var invinc_flag = false;
 
 
-//enemy constants
-
-var enemy_height = 10;
-var enemy_width = 10;
-var enemy_speed = 2.3;
 
 var title_pointer = new Object();
 var game_start = false;
 var power_jump = false;
+
+//enemy constants
+var enemy_height = 40;
+var enemy_width = 30;
+var enemy_speed = 0.5;
+//var enemy_speed = 2.3;

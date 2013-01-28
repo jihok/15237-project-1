@@ -21,7 +21,6 @@ function Platform(x, y, width, horizontal, vertical) {
 
 function Enemy(x, y, width, i) {
 	this.x = x + 5 + Math.floor(Math.random()*(width - enemy_width - 5));
-	
 	this.y = y - enemy_height;
 	this.left = x;
 	this.right = x+width;
@@ -34,7 +33,15 @@ function Enemy(x, y, width, i) {
 	this.vy = 0;
 	this.width = enemy_width;
 	this.height = enemy_height;
-	this.i = i;
+	this.img = new Image();
+	this.img.src = "enemy1.png";
+	this.sx = [0,40,80,115,150, 490,525,565,605,640];
+	this.sy = [0];
+	this.sWidth = [35,30,30,30,30, 30,35,30,30,30];
+	this.sHeight = [50];
+	this.si = 0;
+	this.sdelay = 0;
+	this.i = i
 }
 
 function Explosion(x,y) {
