@@ -3,7 +3,7 @@ var projectile_width = 10;
 var projectile_speed = 4;
 var explosion_diameter = 20;
 
-//Platform constructor. x is leftmost point. 
+//Platform constructor. x is leftmost point.
 function Platform(x, y, width, horizontal, vertical) {
 	horizontal = 0;
 	vertical = 0;
@@ -25,7 +25,7 @@ function Enemy(x, y, width, i) {
 	this.y = y - enemy_height;
 	this.left = x;
 	this.right = x+width;
-	if (Math.random() > .5) {
+	if (Math.random() > 0.5) {
 		this.vx = enemy_speed;
 	}
 	else {
@@ -34,7 +34,7 @@ function Enemy(x, y, width, i) {
 	this.vy = 0;
 	this.width = enemy_width;
 	this.height = enemy_height;
-	this.i = i
+	this.i = i;
 }
 
 function Explosion(x,y) {
@@ -45,7 +45,7 @@ function Explosion(x,y) {
 	this.time = 0;
 }
 
-//Projectile constructor. 
+//Projectile constructor.
 function Projectile(x, y) {
 	var center_x = player.x + (player.width/2) - (projectile_width/2);
 	var center_y = player.y + (player.height/2) - (projectile_height/2);

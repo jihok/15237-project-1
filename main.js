@@ -11,23 +11,23 @@ function init() {
 	platform_init(); //creates platform objects. For now, is hardcoded, perhaps add randomization later
 	enemy_init();
 	lava.y = 500;
-	lava.vy = -.05;
+	lava.vy = -0.05;
 	r_y = 0;
 	death_flag = false;
 	victory_flag = false;
-	canvas.setAttribute('tabindex','0'); 
+	canvas.setAttribute('tabindex','0');
 	canvas.focus();
-	
+
 	intervalId = setInterval(update, timerDelay); //starts the timer
 }
 
 //initializes player attributes
 function player_init() {
-	player.vx = 0; 
+	player.vx = 0;
 	player.vy = 0;
 	player.x = 0;
 	player.y = 360;
-	player.width = 17; //slightly smaller than actual img to account for player not actually "colliding" with enemy 
+	player.width = 17; //slightly smaller than actual img to account for player not actually "colliding" with enemy
 	player.height = 40;
 	player.img = new Image();
 	player.img.src = "megaman_run.jpg";
@@ -70,21 +70,13 @@ function enemy_init() {
 	}
 }
 
-//equivalent of onTimer. this is what we do every "tick". 
+//equivalent of onTimer. this is what we do every "tick".
 //Currently code is rather complicated and maybe should be
-//separated into helper functions. 
-function update() { 
-	if (death_flag) { 
-		alert("died");
-		clearInterval(intervalId);
-	}
-	if (victory_flag) {
-		alert("victory");
-		clearInterval(intervalId);
-	}
+//separated into helper functions.
+function update() {
 	var i = 0; //just a variable for traversing indices
 	
-	//movement is done indirectly by giving a player acceleration. 
+	//movement is done indirectly by giving a player acceleration.
 	//note you can only accelerate
     if (key_pressed_left && player.vy === 0) {
 		if (player.ri < 6)
@@ -99,7 +91,7 @@ function update() {
 				player.ri = 7;
 		}
 		
-		player.vx -= .06;
+		player.vx -= 0.06;
 		//player.vx = Math.max(player.vx - .06, -1 * max_speed);
 	}
     if (key_pressed_right && player.vy === 0) {
@@ -115,7 +107,7 @@ function update() {
 				player.ri = 0;
 		}
 		
-		player.vx += .06;
+		player.vx += 0.06;
 		//player.vx = Math.min(player.vx + .06, max_speed);
     }
 	console.log(platform[0].vx);
@@ -141,7 +133,7 @@ function update() {
 	
 	//friction
 	if (player.vy === 0) {
-		player.vx -= (player.vx * .04)
+		player.vx -= (player.vx * 0.04);
 	}
 	lava.y += lava.vy;
 	if (lava.y <= player.y + player.height) {
@@ -162,6 +154,24 @@ function update() {
 	}
 	update_enemies();
 	draw();
+	if(game_start === false) {
+		clearInterval(intervalId);
+		ctx.fillRect(0,0,400,500);
+	}
+	if (victory_flag) {
+		clearInterval(intervalId);
+		ctx.fillRect(0,0,400,500);
+		ctx.font = "60px Arial";
+		ctx.textAlign = "center";
+		ctx.fillText("GAME OVER",200,200);
+	}
+	if (death_flag) {
+		clearInterval(intervalId);
+		ctx.fillRect(0,0,400,500);
+		ctx.font = "60px Arial";
+		ctx.textAlign = "center";
+		ctx.fillText("GAME OVER",200,200);
+	}
 }
 
 function update_platforms() {
@@ -208,7 +218,7 @@ function update_enemies() {
 
 function player_enemy_collision_handler() {
 	var i = 0;
-	while (i < enemy_list.length) { 
+	while (i < enemy_list.length) {
 		if (detect_collision(player, enemy_list[i])) {
 			death_flag = true;
 			break;
@@ -260,7 +270,7 @@ function detect_projectile_collision() {
 		if (detected === false) {
 			i++;
 		}
-		detected = false; 
+		detected = false;
 	}
 }
 
@@ -277,17 +287,17 @@ function handle_projectile_platform_collision(i,j) {
 }
 	/*
 	if (projectile[i].x - projectile[i].vx + projectile_width <= platform[j].x) {
-		explosion.push(new Explosion(platform[j].x - projectile_width, 
+		explosion.push(new Explosion(platform[j].x - projectile_width,
 		projectile[i].vx = 0;
 	} else if (projectile[i].x - projectile[i].vx >= platform[j].x + platform[j].width) {
 			projectile[i].x = platform[j].x + platform_width;
 			projectile[i].vx = 0;
-	} else if (projectile[i].y - projectile[i].vy + projectile_height <= platform[j].y) { 
+	} else if (projectile[i].y - projectile[i].vy + projectile_height <= platform[j].y) {
 		projectile[i].y = platform[j].y - projectile_height;
 		projectile[i].vy = 0;
 	} else  {
 		projectile[i].y = platform[j].y + platform[j].height;
-		projectile[i].vy = 0;	
+		projectile[i].vy = 0;
 	}
 }*/
 
@@ -298,22 +308,22 @@ function player_platform_collision_handler() {
 				//now have to determine which direction we're hitting it from.
 				/*Note that you can't just undo the change in position
 				because that might leave a small gap between
-				the two objects instead of having them touch like you'd expect.*/ 
-				//colliding sets velocity to 0 and position accordingly. 
+				the two objects instead of having them touch like you'd expect.*/
+				//colliding sets velocity to 0 and position accordingly.
 				if (player.x - player.vx + player.width <= platform[i].x) {
 					player.x = platform[i].x - player.width;
 					player.vx = 0;
 				} else if (player.x - player.vx >= platform[i].x + platform[i].width) {
 						player.x = platform[i].x + platform[i].width;
 						player.vx = 0;
-				} else if (player.y - player.vy + player.height <= platform[i].y) { 
+				} else if (player.y - player.vy + player.height <= platform[i].y) {
 					player.y = platform[i].y - player.height;
 					player.vy = 0;
 					player.i = i;
 					console.log('fuck');
 				} else  {
 					player.y = player.y - player.vy;//platform[i].y + platform[i].height;
-					player.vy = 0;	
+					player.vy = 0;
 				}
 			}
 			i++;
@@ -341,10 +351,10 @@ function check_inbounds() {
 }
 
 //detects collisions, returns boolean.
-/*General purpose so can be used for any two 
+/*General purpose so can be used for any two
 objects with x,y,width,height attributes.*/
 function detect_collision(obj1, obj2) {
-	if ((obj1.x + obj1.width > obj2.x) && 
+	if ((obj1.x + obj1.width > obj2.x) &&
 		(obj1.x < obj2.x + obj2.width) &&
 		(obj1.y + obj1.height > obj2.y) &&
 		(obj1.y < obj2.y + obj2.height)) {
@@ -365,7 +375,7 @@ function draw() {
 		i++;
 	}
 	
-	ctx.drawImage(player.img, player.runx[player.ri], player.runy[Math.floor(player.ri/7)], 
+	ctx.drawImage(player.img, player.runx[player.ri], player.runy[Math.floor(player.ri/7)],
 					player.runwidth[player.ri], 170, player.x, player.y, 24, 40);
 
 	ctx.fillStyle = "red";
@@ -380,7 +390,7 @@ function draw() {
 	i = 0;
 	while (i < explosion.length) {
 		//The following two lines are identical because width/height is always being assigned to
-		//explosion_diameter but for consistency i thought it would be nice s.t. 
+		//explosion_diameter but for consistency i thought it would be nice s.t.
 		//all our objects have a width and height, and that we always reference it.
 		//Same for projectile
 	
@@ -393,7 +403,7 @@ function draw() {
 		if (explosion[i].time === explosion_timeout) {
 			explosion.splice(i,1);
 		}
-		else { 
+		else {
 			i++;
 		}
 	}
