@@ -57,14 +57,14 @@ function player_init() {
 
 //creates our platform objects, hardcoded as of now
 function platform_init() {
-	platform.push(new Platform(0, 400, 400, 10, 0));
-	platform.push(new Platform(100, 320, 100, 50, 20));
-	platform.push(new Platform(0, 260, 100, 35, 10));
-	platform.push(new Platform(200, 200, 100, 20, 40));
-	platform.push(new Platform(80, 140, 100, 0, 70));
-	platform.push(new Platform(0, 80, 100, 20, 20));
-	platform.push(new Platform(200, 20, 100, 30, 30));
-	platform.push(new Platform(80, -20, 100, 50, 20));
+	platform.push(new Platform(0, 400, 400, 0, 0));
+	platform.push(new Platform(100, 320, 100, 0, 0));
+	platform.push(new Platform(0, 260, 100, 0, 0));
+	platform.push(new Platform(200, 200, 100, 0, 0));
+	platform.push(new Platform(80, 140, 100, 0, 0));
+	platform.push(new Platform(0, 80, 100, 0, 0));
+	platform.push(new Platform(200, 20, 100, 0, 0));
+	platform.push(new Platform(80, -20, 100, 0, 0));
 }
 
 //creates enemy objects, to be finished later
@@ -185,7 +185,9 @@ function update() {
 function update_platforms() {
 	var i =0;
 	var plat;
+    console.log("moving platforms");
 	while (i < platform.length) {
+        console.log("" + i + " is i");
 		plat = platform[i];
 		plat.x += plat.vx;
 		plat.y += plat.vy;
@@ -400,16 +402,16 @@ function draw() {
 	
 	//draw the player
 	ctx.drawImage(player.img, player.runx[player.ri], player.runy[Math.floor(player.ri/7)], 
-					player.runwidth[player.ri], 170, player.x, player.y, 24, 40);
+					player.runwidth[player.ri], 170, player.x, player.y + r_y, 24, 40);
 
 	ctx.fillStyle = "red";
 	console.log(canvas.height);
 	ctx.fillRect(0, lava.y + r_y, canvas.width, canvas.height - lava.y);
 	if (lava.y < (canvas.height - lava.sHeight[0])) {
-		ctx.drawImage(lava.img, lava.sx[0], lava.sy[0], lava.sWidth[0], lava.sHeight[0], 20, lava.y, lava.sWidth[0], lava.sHeight[0]);
+		ctx.drawImage(lava.img, lava.sx[0], lava.sy[0], lava.sWidth[0], lava.sHeight[0], 20, lava.y + r_y, lava.sWidth[0], lava.sHeight[0]);
 	}
 	
-	ctx.drawImage(lava.img, lava.sx[1], lava.sy[1], lava.sWidth[1], lava.sHeight[1], 100, lava.y-lava.sHeight[1], lava.sWidth[1], lava.sHeight[1]);
+	ctx.drawImage(lava.img, lava.sx[1], lava.sy[1], lava.sWidth[1], lava.sHeight[1], 100, lava.y-lava.sHeight[1] + r_y, lava.sWidth[1], lava.sHeight[1]);
 	
 	//ctx.fillRect(player.x, player.y + (player.height/2) + r_y, 40, 2);
 	i = 0;
