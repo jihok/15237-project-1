@@ -8,7 +8,7 @@ function onKeyDown(event) {
 		else if (event.keyCode === 68) {
 			key_pressed_right = true;
 		}
-		else if (event.keyCode === 82) {
+		else if (event.keyCode === 82 && death_flag === true) {
 			clearInterval(intervalId);
 			init();
 		}
@@ -74,6 +74,10 @@ function onMouseDown(event) {
 			player.vx -= recoil*(projectile[i].vx);
 			player.vy -= recoil*(projectile[i].vy);
 			lastFired = 0;
+		}
+		if (victory_flag === true) {
+			clearInterval(intervalId);
+			init();
 		}
 	}
 }

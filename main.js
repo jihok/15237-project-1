@@ -89,14 +89,19 @@ function level_end_init() {
 
 //creates our platform objects, hardcoded as of now
 function platform_init() {
-	platform.push(new Platform(0, 400, 400, 0, 0));
-	platform.push(new Platform(100, 320, 100, 0, 0));
-	platform.push(new Platform(0, 260, 100, 0, 0));
-	platform.push(new Platform(200, 200, 100, 0, 0));
-	platform.push(new Platform(80, 140, 100, 0, 0));
-	platform.push(new Platform(0, 80, 100, 0, 0));
-	platform.push(new Platform(200, 20, 100, 0, 0));
-	platform.push(new Platform(80, -20, 100, 0, 0));
+	if(game_state <= 1) {
+		platform.push(new Platform(0, 400, 400, 0, 0));
+		platform.push(new Platform(100, 320, 100, 0, 0));
+		platform.push(new Platform(0, 260, 100, 0, 0));
+		platform.push(new Platform(200, 200, 100, 0, 0));
+		platform.push(new Platform(80, 140, 100, 0, 0));
+		platform.push(new Platform(0, 80, 100, 0, 0));
+		platform.push(new Platform(200, 20, 100, 0, 0));
+		platform.push(new Platform(80, -20, 100, 0, 0));
+	}
+	if(game_state === 2) {
+		platform.push(new Platform(0, 400, 400, 0, 0));
+	}
 }
 
 //creates enemy objects, to be finished later
@@ -235,7 +240,10 @@ function update() {
 		ctx.fillRect(0,0,400,500);
 		ctx.font = "60px Arial";
 		ctx.textAlign = "center";
-		ctx.fillText("Stage Cleared!",200,200);
+		ctx.fillText("Stage",200,200);
+		ctx.fillText("Cleared!",200,270);
+		ctx.font = "30px Arial";
+		ctx.fillText("Click anywhere to continue",200,350);
 		game_state++;
 	}
 	if (death_flag) {
