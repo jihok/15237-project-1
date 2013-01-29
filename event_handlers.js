@@ -1,5 +1,5 @@
 function onKeyDown(event) {
-	if(game_start === true) {
+	if(game_state > 0) {
 		//going left
 	    if (event.keyCode === 65) {
 	        key_pressed_left = true;
@@ -31,13 +31,6 @@ function onKeyDown(event) {
 			player.vy -= 3;
 		}
 	}
-	else {
-		if(event.keyCode === 13) {
-			clearInterval(intervalId);
-			game_start = true;
-			init();
-		}
-	}
 	//now that i think about it there'd be a better way to do this by
 	//changing the speed directly in update and having this simply
 	//set a boolean
@@ -54,12 +47,42 @@ function onKeyUp(event) {
 }
 
 function onMouseDown(event) {
-	if (lastFired > fireRate) {
-		var x = event.pageX - canvas.offsetLeft;
-		var y = event.pageY - canvas.offsetTop - r_y;
-		var i = projectile.push(new Projectile(x,y)) - 1;
-		player.vx -= recoil*(projectile[i].vx);
-		player.vy -= recoil*(projectile[i].vy);
-		lastFired = 0;
+	if(game_state === 0) {
+		if(event.pageX >= 125 && event.pageX <= 295) {
+			if(event.pageY >= 250 && event.pageY <= 300) {
+				clearInterval(intervalId);
+				game_state = 1;
+				init();
+			}
+			if(event.pageY >= 310 && event.pageY <= 360) {
+				clearInterval(intervalId);
+				game_state = 1;
+				init();
+			}
+			if(event.pageY >= 370 && event.pageY <= 420) {
+				clearInterval(intervalId);
+				game_state = 1;
+				init();
+			}
+		}
 	}
+	else {
+		if (lastFired > fireRate) {
+			var x = event.pageX - canvas.offsetLeft;
+			var y = event.pageY - canvas.offsetTop - r_y;
+			var i = projectile.push(new Projectile(x,y)) - 1;
+			player.vx -= recoil*(projectile[i].vx);
+			player.vy -= recoil*(projectile[i].vy);
+			lastFired = 0;
+		}
+	}
+}
+
+function onMouseMove(event) {
+	var cursor_x = event.pageX;
+	var cursor_y = event.pageY;
+
+	//for the cannon rotation angle
+	if (cursor_x !== undefined) x_diff = cursor_x - cannon.x;
+	if (cursor_y !== undefined) y_diff = cursor_y - cannon.y;
 }

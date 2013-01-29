@@ -3,13 +3,16 @@ function init() {
 	canvas.addEventListener('keyup', onKeyUp, false);
 	canvas.addEventListener('keydown', onKeyDown, false);
 	canvas.addEventListener('mousedown', onMouseDown, false);
+	canvas.addEventListener('mousemove', onMouseMove, false);
 	enemy_list = [];
 	projectile = [];
 	explosion = [];
 	platform = [];
 	player_init(); //initializes player attributes
+	cannon_init();
 	platform_init(); //creates platform objects. For now, is hardcoded, perhaps add randomization later
 	enemy_init();
+	level_end_init();
 	lava.y = 500;
 	lava.vy = -.05;
 	lava.img = new Image();
@@ -53,6 +56,22 @@ function player_init() {
 	*/
 	player.i = 0;
 	
+}
+
+//initializes cannon attributes
+function cannon_init() {
+	cannon.x = player.x;
+	cannon.y = player.y + r_y;
+	cannon.width = 10;
+	cannon.height = 5;
+	cannon.angle = Math.atan2(y_diff,x_diff);
+}
+
+function level_end_init() {
+	level_end.x = 200;
+	level_end.y = 200;
+	level_end.width = 30;
+	level_end.height = 45;
 }
 
 //creates our platform objects, hardcoded as of now
@@ -135,6 +154,8 @@ function update() {
 	//check collisions with platforms
 	player_platform_collision_handler();
 	
+	victory_collision_handler();
+
 	if (!invinc_flag) {
 		player_enemy_collision_handler();
 	}
@@ -161,25 +182,52 @@ function update() {
 		r_y--;
 	}
 	update_enemies();
+	update_cannon();
 	draw();
-	if(game_start === false) {
+	if(game_state === 0) {
 		clearInterval(intervalId);
+		ctx.fillStyle = "black";
 		ctx.fillRect(0,0,400,500);
+		ctx.strokeStyle = "white";
+		ctx.strokeRect(115,240,170,50);
+		ctx.strokeRect(115,300,170,50);
+		ctx.strokeRect(115,360,170,50);
+		ctx.fillStyle = "white";
+		ctx.font = "60px Arial";
+		ctx.textAlign = "center";
+		ctx.fillText("Project 1",200,150);
+		ctx.font = "40px Arial";
+		ctx.fillText("Start",200,280);
+		ctx.fillText("Controls",200,340);
+		ctx.fillText("Credits",200,400);
 	}
 	if (victory_flag) {
 		clearInterval(intervalId);
+		ctx.fillStyle = "rgba(0,0,0,0.5)";
 		ctx.fillRect(0,0,400,500);
 		ctx.font = "60px Arial";
 		ctx.textAlign = "center";
-		ctx.fillText("GAME OVER",200,200);
+		ctx.fillText("Stage Cleared!",200,200);
+		game_state++;
 	}
 	if (death_flag) {
 		clearInterval(intervalId);
+		ctx.fillStyle = "rgba(255,255,255,0.9)";
 		ctx.fillRect(0,0,400,500);
+		ctx.fillStyle = "rgb(0,0,0)";
 		ctx.font = "60px Arial";
 		ctx.textAlign = "center";
-		ctx.fillText("GAME OVER",200,200);
+		ctx.fillText("G A M E",200,200);
+		ctx.fillText("O V E R",200,270);
+		ctx.font = "30px Arial";
+		ctx.fillText("Press 'r' to restart",200,350);
 	}
+}
+
+function update_cannon() {
+	cannon.x = player.x;
+	cannon.y = player.y + r_y;
+	cannon.angle = Math.atan2(y_diff,x_diff);
 }
 
 function update_platforms() {
@@ -355,6 +403,11 @@ function player_platform_collision_handler() {
 		}
 }
 
+function victory_collision_handler() {
+	if(detect_collision(player, level_end))
+		victory_flag = true;
+}
+
 //for the player, checks to see if you're in the boundaries of the canvas
 function check_inbounds() {
 	if (player.x < 0) {
@@ -375,6 +428,7 @@ function check_inbounds() {
 	}
 }
 
+
 //detects collisions, returns boolean.
 /*General purpose so can be used for any two
 objects with x,y,width,height attributes.*/
@@ -392,6 +446,7 @@ function detect_collision(obj1, obj2) {
 //draws our board
 function draw() {
 	var i = 0;
+	
 	ctx.clearRect(0,0,400,500);
 	ctx.fillStyle = "black";
 		//ctx.fillRect(player.x, player.y + r_y, 40,40);
@@ -399,6 +454,13 @@ function draw() {
 		ctx.fillRect(platform[i].x, platform[i].y + r_y, platform[i].width, platform[i].height);
 		i++;
 	}
+	//draw the cannon
+	ctx.save();
+	ctx.translate(cannon.x, cannon.y);
+	ctx.rotate(cannon.angle);
+	ctx.translate(-cannon.x, -cannon.y - r_y);
+	ctx.fillRect(cannon.x, cannon.y + r_y, cannon.width, cannon.height);
+	ctx.restore();
 	
 	//draw the player
 	ctx.drawImage(player.img, player.runx[player.ri], player.runy[Math.floor(player.ri/7)], 
@@ -451,6 +513,11 @@ function draw() {
 		//ctx.fillRect(enemy_list[i].x, enemy_list[i].y + r_y, enemy_list[i].width, enemy_list[i].height);
 		i++;
 	}
+
+
+
+	//draw the level end
+	ctx.fillRect(level_end.x,level_end.y,level_end.width,level_end.height);
 }
 
 init();
