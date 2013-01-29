@@ -136,7 +136,7 @@ function update() {
 	player.y += player.vy ;//+ platform[player.i].vy;
 	update_platforms();
 	if (Math.abs(player.vy) >= 2*gravity) {
-        player.vx += platform[player.i].vx;
+        //player.vx += platform[player.i].vx;
 		player.i = 0;
 	}
 	//gives constant accleration downwards
