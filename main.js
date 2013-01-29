@@ -83,6 +83,8 @@ function level_end_init() {
 	level_end.y = 200 + r_y;
 	level_end.width = 30;
 	level_end.height = 45;
+	level_end.img = new Image();
+	level_end.img.src = "9_door.jpg";
 }
 
 //creates our platform objects, hardcoded as of now
@@ -526,7 +528,10 @@ function draw() {
 	//draw the player
 	ctx.drawImage(player.img, player.rx[player.ri], player.ry[Math.floor((player.ri+1)/7)], 
 					player.rWidth[player.ri], 170, player.x, player.y + r_y, player.width, player.height);	
-		
+	
+	//draw the level end
+	ctx.drawImage(level_end.img,level_end.x,level_end.y+r_y,level_end.width,level_end.height);
+
 	//draw projectiles and explosions
 	i = 0;
 	while (i < projectile.length) {
@@ -567,8 +572,6 @@ function draw() {
 		//ctx.fillRect(enemy_list[i].x, enemy_list[i].y + r_y, enemy_list[i].width, enemy_list[i].height);
 		i++;
 	}
-	//draw the level end
-	ctx.fillRect(level_end.x,level_end.y+r_y,level_end.width,level_end.height);
 }
 
 init();
