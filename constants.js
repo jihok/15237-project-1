@@ -6,6 +6,7 @@ var platform = []; //list of platform objects
 var enemy_list = [];
 var projectile = [];
 var explosion = [];
+var bkg_img = new Image();
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 var intervalId;
@@ -43,7 +44,6 @@ var r_y = 0;
 var death_flag = false;
 var victory_flag = false;
 var invinc_flag = false;
-
 
 //enemy constants
 
