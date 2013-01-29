@@ -80,7 +80,7 @@ function cannon_init() {
 
 function level_end_init() {
 	level_end.x = 200;
-	level_end.y = 200;
+	level_end.y = 200 + r_y;
 	level_end.width = 30;
 	level_end.height = 45;
 }
@@ -568,7 +568,7 @@ function draw() {
 		i++;
 	}
 	//draw the level end
-	ctx.fillRect(level_end.x,level_end.y,level_end.width,level_end.height);
+	ctx.fillRect(level_end.x,level_end.y+r_y,level_end.width,level_end.height);
 }
 
 init();
