@@ -51,5 +51,12 @@ Jiho:
 Norbert:
 
 *enemy speedup and move towards player
-
 *randomly generated platform method
+
+
+Credits:
+lava img: http://www.spriters-resource.com/ds/megamanzx/sheet/76
+background img: http://www.michaelspornanimation.com/splog/?p=3080
+player img: http://cobalt-blue-knight.deviantart.com/art/Megaman-Running-Sprites-178109596
+explosion img: http://www.sprites-inc.co.uk/files/ZX/Zx1/Enemy/
+enemy img: http://www.nes-snes-sprites.com/DonkeyKongCountry2DiddysKongQuestEnemies.html

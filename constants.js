@@ -7,6 +7,7 @@ var enemy_list = [];
 var enemy2_list = [];
 var projectile = [];
 var explosion = [];
+var bkg_img = new Image();
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 var intervalId;
@@ -45,11 +46,13 @@ var death_flag = false;
 var victory_flag = false;
 var invinc_flag = false;
 
+var cannon = new Object();
+var x_diff = 0;
+var y_diff = 0;
 
-
-var title_pointer = new Object();
-var game_start = false;
-var power_jump = false;
+var level_end = new Object();
+var game_state = 0;
+//var power_jump = false;
 
 //enemy constants
 var enemy_height = 40;
