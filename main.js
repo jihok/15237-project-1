@@ -91,13 +91,22 @@ function level_end_init() {
 function platform_init() {
 	if(game_state <= 1) {
 		platform.push(new Platform(0, 400, 400, 0, 0));
-		platform.push(new Platform(100, 320, 100, 0, 0));
-		platform.push(new Platform(0, 260, 100, 0, 0));
-		platform.push(new Platform(200, 200, 100, 0, 0));
-		platform.push(new Platform(80, 140, 100, 0, 0));
-		platform.push(new Platform(0, 80, 100, 0, 0));
-		platform.push(new Platform(200, 20, 100, 0, 0));
-		platform.push(new Platform(80, -20, 100, 0, 0));
+
+		var plat_num = 0;
+		var plat_y = 400;
+		var plat_x = Math.floor(Math.random()*300);
+		while (plat_num < 10) {
+			var next_plat_y = Math.floor(Math.random()*40) + 40;
+			plat_y -= next_plat_y;
+			platform.push(new Platform(plat_x, plat_y, 100, 0, 0));
+			var next_plat_x = Math.floor(Math.random()*150);
+			if(plat_num % 2 === 1)
+				next_plat_x += 150;
+			plat_x = next_plat_x;
+			if (plat_x > 300 || plat_x < 0)
+				plat_x = Math.floor(Math.random()*200) + Math.floor(Math.random()*100);
+			plat_num++;
+		}
 	}
 	if(game_state === 2) {
 		platform.push(new Platform(0, 400, 400, 0, 0));
