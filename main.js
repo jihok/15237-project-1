@@ -59,7 +59,7 @@ function player_init() {
 }
 
 //creates our platform objects, hardcoded as of now
-function platform_init() {
+/*function platform_init() {
 	platform.push(new Platform(0, 400, 400, 0, 0));
 	platform.push(new Platform(100, 320, 100, 60, 0));
 	platform.push(new Platform(0, 260, 100, 0, 0));
@@ -68,7 +68,7 @@ function platform_init() {
 	platform.push(new Platform(0, 80, 100, 0, 0));
 	platform.push(new Platform(200, 20, 100, 0, 0));
 	platform.push(new Platform(80, -20, 100, 0, 0));
-}
+}*/
 
 //creates enemy objects, to be finished later
 function enemy_init() {
@@ -136,10 +136,10 @@ function update() {
 	player.x += player.vx + platform[player.i].vx;
 	player.y += player.vy ;//+ platform[player.i].vy;
 	update_platforms();
-	if (Math.abs(player.vy) >= 2*gravity) {
-        //player.vx += platform[player.i].vx;
+	/*if (Math.abs(player.vy) >= 2*gravity) {
+        player.vx += platform[player.i].vx;
 		player.i = 0;
-	}
+	}*/
 	//gives constant accleration downwards
 	player.vy += gravity;
 	//player.vy = Math.min(player.vy + gravity, free_fall_speed);
@@ -177,6 +177,7 @@ function update() {
 	}
 	update_enemies(enemy_list);
     update_enemies(enemy2_list);
+    enemy_fire();
 	draw();
 	if(game_start === false) {
 		clearInterval(intervalId);
@@ -196,6 +197,18 @@ function update() {
 		ctx.textAlign = "center";
 		ctx.fillText("GAME OVER",200,200);
 	}
+}
+
+function enemy_fire() {
+    var i =0;
+    while (i < enemy2_list) {
+        enemy = enemy2_list[i];
+        if ((Math.abs(enemy.x - player.x) < canvas.width/2)
+            && (Math.abs(enemy.y - player.y) < canvas.height/2)) {
+                
+            }
+            i++;
+    }
 }
 
 function update_platforms() {
@@ -379,9 +392,6 @@ function player_platform_collision_handler() {
                         player.y += platform[i].vy;
                         player.vy = platform[i].vy;
                     }
-                    //player.vx += platform[i].vx;
-					//console.log('fml');
-                    console.log("floor");
 				} else  {
 					player.y = player.y - player.vy;//platform[i].y + platform[i].height;
 					player.vy = 0;
@@ -583,6 +593,7 @@ function cannon_init() {
 	cannon.sWidth = [30,35];
 	cannon.sHeight = [20,20];
 	cannon.i = 0;
+    cannon.hoz_adj = 10;
 }
 
 function level_end_init() {
@@ -603,9 +614,13 @@ function platform_init() {
 		var plat_y = 400;
 		var plat_x = Math.floor(Math.random()*300);
 		while (plat_num < 10) {
-			var next_plat_y = Math.floor(Math.random()*40) + 40;
+			var next_plat_y = Math.floor(Math.random()*30) + 40;
 			plat_y -= next_plat_y;
-			platform.push(new Platform(plat_x, plat_y, 100, 0, 0));
+            horiz = Math.min(canvas.width - (plat_x + 200), Math.min(plat_x, Math.random() * 300));
+            if (horiz < 5) {
+                horiz = 0;
+            }
+			platform.push(new Platform(plat_x, plat_y, 100, horiz, 0));
 			var next_plat_x = Math.floor(Math.random()*150);
 			if(plat_num % 2 === 1)
 				next_plat_x += 150;
@@ -683,6 +698,7 @@ function update() {
 	player.y += player.vy + platform[player.i].vy;
 	update_platforms();
 	if (Math.abs(player.vy) >= 2*gravity) {
+        player.vx += platform[player.i].vx;
 		player.i = 0;
 	}
 	//gives constant accleration downwards
@@ -779,11 +795,13 @@ function update() {
 function update_cannon() {
 	if (key_pressed_right) {
 		cannon.si = 0; //right gun sprite
-		cannon.x = player.x+player.width-10; //subtract a little so player hand is "holding" gun
+        cannon.hoz_adj = 4.5;
+		//cannon.x = player.x+player.width-10; //subtract a little so player hand is "holding" gun
 	}
 	else if (key_pressed_left) {
 		cannon.si = 1; //left gun sprite
-		cannon.x = player.x+10;
+		cannon.hoz_adj = -4.5;
+        //cannon.x = player.x+10;
 	}
 	cannon.y = player.y + r_y +(player.height/2);
 	cannon.angle = Math.atan2(y_diff,x_diff);
@@ -792,11 +810,10 @@ function update_cannon() {
 function update_platforms() {
 	var i =0;
 	var plat;
-    console.log("moving platforms");
 	while (i < platform.length) {
-        console.log("" + i + " is i");
 		plat = platform[i];
 		plat.x += plat.vx;
+        console.log(plat.vx);
 		plat.y += plat.vy;
 		if (plat.x <= plat.left) {
 			plat.vx = Math.abs(plat.vx);
@@ -892,6 +909,15 @@ function detect_projectile_collision() {
 			}
 			j++;
 		}
+        	
+        if (((projectile[i].x < 0) 
+            || (projectile[i].x + projectile[i].width > canvas.width))
+            && (detected === false)){
+            explosion.push(new Explosion(projectile[i].x, projectile[i].y));
+            projectile.splice(i,1);
+            detected = true;
+        }
+        
 		k = 0;
 		while (k < enemy_list.length && (detected === false)) {
 			if (detect_collision(projectile[i], enemy_list[k])) {
@@ -944,20 +970,39 @@ function player_platform_collision_handler() {
 				because that might leave a small gap between
 				the two objects instead of having them touch like you'd expect.*/
 				//colliding sets velocity to 0 and position accordingly.
-				if (player.x - player.vx + player.width <= platform[i].x) {
+                
+				if (player.x - player.vx + platform[i].vx + player.width <= platform[i].x) {
 					player.x = platform[i].x - player.width;
 					player.vx = 0;
-				} else if (player.x - player.vx >= platform[i].x + platform[i].width) {
+                    if (platform[i].vx < 0 ) {
+                        player.x += platform[i].vx;
+                        player.vx = platform[i].vx;
+                    }
+				} else if (player.x - player.vx + platform[i].vx >= platform[i].x + platform[i].width) {
 						player.x = platform[i].x + platform[i].width;
 						player.vx = 0;
-				} else if (player.y - player.vy + player.height <= platform[i].y) {
+                        if (platform[i].vx > 0) {
+                            player.x += platform[i].vx;
+                            player.vx = platform[i].vx;
+                        }
+				} else if (player.y - player.vy + player.height + platform[i].vy <= platform[i].y) {
 					player.y = platform[i].y - player.height;
 					player.vy = 0;
 					player.i = i;
+                    if (platform[i].vy < 0) {
+                        player.y += platform[i].vy;
+                        player.vy = platform[i].vy;
+                    }
+                    //player.vx += platform[i].vx;
 					//console.log('fml');
+                    console.log("floor");
 				} else  {
 					player.y = player.y - player.vy;//platform[i].y + platform[i].height;
 					player.vy = 0;
+                    if (platform[i].vy > 0) {
+                        player.y += platform[i].vy;
+                        player.vy = platform[i].vy;
+                    }
 				}
 			}
 			i++;
@@ -1050,12 +1095,16 @@ function draw() {
 					
 	//draw the cannon
 	ctx.save();
-	ctx.translate(cannon.x, cannon.y);
-	ctx.rotate(cannon.angle);
-	ctx.translate(-cannon.x, -cannon.y - r_y);
+	ctx.translate(player.x + cannon.hoz_adj, cannon.y);
+    if (cannon.si === 0) {
+        ctx.rotate(cannon.angle);
+    } else {
+        ctx.rotate(-cannon.angle);
+    }
+	ctx.translate(-player.x + cannon.hoz_adj, -cannon.y - r_y);
 	ctx.drawImage(cannon.img, cannon.sx[cannon.si], cannon.sy[cannon.si], 
 				cannon.sWidth[cannon.si], cannon.sHeight[cannon.si], 
-				cannon.x, cannon.y + r_y, cannon.width, cannon.height);
+				player.x + cannon.hoz_adj, cannon.y + r_y, cannon.width, cannon.height);
 	//ctx.fillRect(cannon.x, cannon.y + r_y, cannon.width, cannon.height);
 	ctx.restore();
 	
