@@ -17,6 +17,13 @@ function Platform(x, y, width, horizontal, vertical) {
 	this.down = y + this.height + vertical;
 	this.vx = horizontal/50;
 	this.vy = vertical/50;
+	
+	this.img = new Image();
+	this.img.src = "platform2.png";
+	this.sx = 10;
+	this.sy = 10;
+	this.sWidth = 320;
+	this.sHeight = 70;
 }
 
 function Enemy(x, y, width, i) {
@@ -36,11 +43,16 @@ function Enemy(x, y, width, i) {
 	this.img = new Image();
 	this.img.src = "enemy1_2.png";
 	this.si = 0; //left: 0-4, right: 5-9
+	this.sright = 4;
+	this.sleft = 9;
+	this.sdelay = 0;
+	this.smax = 3;
+	
 	this.sx = [0,40,80,115,150, 490,525,565,605,640];
 	this.sy = [0];
 	this.sWidth = [35,30,30,30,30, 30,35,30,30,30];
 	this.sHeight = [50];
-	this.sdelay = 0;
+
 	this.i = i
 }
 
@@ -72,4 +84,13 @@ function Projectile(x, y) {
 	this.time = 0;
 	this.height = projectile_height;
 	this.width = projectile_width;
+	
+	this.img = new Image();
+	this.img.src = "explosion_1.png";
+	this.si = 1;
+	this.sx = [0,14,35,64];
+	this.sy = [16,10,2,1];
+	this.sWidth = [10,16,25,25];
+	this.sHeight = [9,15,23,24];
+	this.sdelay = 0;
 }

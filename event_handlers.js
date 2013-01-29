@@ -31,6 +31,7 @@ function onKeyDown(event) {
 			player.vy -= 3;
 		}
 	}
+	
 	else {
 		if(event.keyCode === 13) {
 			clearInterval(intervalId);

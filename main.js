@@ -7,6 +7,7 @@ function init() {
 	projectile = [];
 	explosion = [];
 	platform = [];
+	bkg_img.src = "lava_background.png";
 	lava_init(); //initializes lava attributes and animation
 	player_init(); //initializes player attributes
 	platform_init(); //creates platform objects. For now, is hardcoded, perhaps add randomization later
@@ -16,23 +17,24 @@ function init() {
 	victory_flag = false;
 	canvas.setAttribute('tabindex','0'); 
 	canvas.focus();
-	
 	intervalId = setInterval(update, timerDelay); //starts the timer
 }
 
 //initializes lava attributes
 function lava_init() {
 	lava.y = 500;
-	lava.vy = -.01;
+	lava.vy = -.05; //rate of lava flow
 	lava.img = new Image();
-	lava.img.src = "lava.png";
-	bkg_img.src = "lava_background.png";
-	lava.sx = [130, 100];
-	lava.sy = [690, 660];
-	lava.sWidth = [60, 20];
-	lava.sHeight = [10, 40];
-	lava.si = 0;
-	lava.sdelay = 0;
+	lava.img.src = "lava1.png";
+
+	lava.anim_x = [0,0,0,0,0,0,0,0];
+	lava.anim_y = [0,0,0,0,0,0,0,0];
+	lava.sx = [0, 0, 195, 290, 290, 0, 0, 290];
+	lava.sy = [0, 160, 148, 235, 235, 160, 160, 235];
+	lava.sWidth = [120, 60, 40, 65, 65, 60, 60, 65];
+	lava.sHeight = [60, 10, 25, 7, 7, 10, 10, 7];
+	lava.sdelay = [0,0,0,0,0,0,0,0];
+	lava.smax = 20;
 }
 
 //initializes player attributes. 
@@ -127,6 +129,13 @@ function update() {
 		player.vx += 0.06;
 		//player.vx = Math.min(player.vx + .06, max_speed);
     }
+	
+	if (player.vy < 0 && player.vx < 0) {
+		player.ri = 7;
+	}
+	else if (player.vy < 0 && player.vx > 0) {
+		player.ri = 1;
+	}
 	player.width = (player.rWidth[player.ri]/player.rWidth[0])*player.width_min;
 	player.x += player.vx + platform[player.i].vx;
 	player.y += player.vy + platform[player.i].vy;
@@ -173,6 +182,7 @@ function update() {
 	draw();
 	if(game_start === false) {
 		clearInterval(intervalId);
+		ctx.fillStyle = "white";
 		ctx.fillRect(0,0,400,500);
 	}
 	if (victory_flag) {
@@ -182,13 +192,15 @@ function update() {
 		ctx.textAlign = "center";
 		ctx.fillText("GAME OVER",200,200);
 	}
+	
 	if (death_flag) {
 		clearInterval(intervalId);
-		ctx.fillRect(0,0,400,500);
+		//ctx.fillRect(0,0,400,500);
 		ctx.font = "60px Arial";
 		ctx.textAlign = "center";
 		ctx.fillText("GAME OVER",200,200);
 	}
+	
 }
 
 function update_player() {
@@ -227,10 +239,12 @@ function update_enemies() {
 	while (i < enemy_list.length) {
 		enemy = enemy_list[i];
 		plat = platform[enemy.i];
+		//going left, turn right
 		if (enemy.x <= plat.x + 5) {
 			enemy.vx = Math.abs(enemy.vx);
-			enemy.si = 5;
+			enemy.si = enemy.sright+1;
 		}
+		//going right, turn left
 		else if (enemy.x + enemy.width >= plat.x + plat.width - 5) {
 			enemy.vx = -Math.abs(enemy.vx);
 			enemy.si = 0;
@@ -238,17 +252,18 @@ function update_enemies() {
 		
 		enemy.x += enemy.vx + plat.vx;
 		enemy.y = plat.y - enemy.height;
-		if (enemy.sdelay !== 3)
+		if (enemy.sdelay !== enemy.smax)
 			enemy.sdelay++;
 		else {
 			enemy.sdelay = 0;
 			enemy.si++;
 			//console.log(enemy.si, enemy.sdelay);
-			if (enemy.si === 10 && enemy.vx > 0)
-				enemy.si = 5;
-			else if (enemy.si === 5 && enemy.vx < 0)
+			//moving right and last right sprite so reset to first right sprite
+			if (enemy.si > (enemy.sleft) && enemy.vx > 0)
+				enemy.si = (enemy.sright+1);
+			//moving left and last left sprite so reset to first left sprite
+			else if (enemy.si > (enemy.sright) && enemy.vx < 0)
 				enemy.si = 0;
-				
 		}
 	i++;
 	}
@@ -268,7 +283,6 @@ function player_enemy_collision_handler() {
 function update_projectiles() {
 	var i = 0;
 	while (i < projectile.length) {
-	
 		//PERHAPS NOT NEEDED
 		if (projectile[i].time === 200) {
 			projectile.shift();
@@ -406,32 +420,51 @@ function draw() {
 	var i = 0;
 	ctx.clearRect(0,0,canvas.width,canvas.height);
 	
-	//draw the background image
+	//draw the background
 	ctx.drawImage(bkg_img, 0, 0, bkg_img.width, bkg_img.height, 0, 0, canvas.width, canvas.height);
-	ctx.fillStyle = "black";
+	
+	//draw the platforms
 	while (i < platform.length) {
-		ctx.fillRect(platform[i].x, platform[i].y + r_y, platform[i].width, platform[i].height);
+		//ctx.fillRect(platform[i].x, platform[i].y + r_y, platform[i].width, platform[i].height);
+		ctx.drawImage(platform[i].img, platform[i].sx, platform[i].sy, platform[i].sWidth, platform[i].sHeight, platform[i].x, platform[i].y + r_y, platform[i].width, platform[i].height);
 		i++;
 	}
-	
-	ctx.drawImage(player.img, player.rx[player.ri], player.ry[Math.floor((player.ri+1)/7)], 
-					player.rWidth[player.ri], 170, player.x, player.y + r_y, player.width, player.height);
 
+	//draw the lava
 	ctx.fillStyle = "red";
 	ctx.fillRect(0, lava.y + r_y, canvas.width, canvas.height - lava.y);
-	if (lava.y < (canvas.height - lava.sHeight[0])) {
-		ctx.drawImage(lava.img, lava.sx[0], lava.sy[0], lava.sWidth[0], lava.sHeight[0], 20, lava.y + r_y, lava.sWidth[0], lava.sHeight[0]);
+	for (var li = 0; li < lava.sx.length; li++) {
+		var ran = Math.random();
+		var ranx = Math.random()*canvas.width;
+		var rany = canvas.height-Math.random()*(canvas.height-lava.y);
+		
+		if (lava.sdelay[li] > 0) {
+			lava.sdelay[li]++;
+			ctx.drawImage(lava.img, lava.sx[li], lava.sy[li], lava.sWidth[li], lava.sHeight[li], 
+				lava.anim_x[li], lava.anim_y[li]+r_y, lava.sWidth[li], lava.sHeight[li]);
+		}
+		else if (ran > 0.5 && (lava.y < (canvas.height - lava.sHeight[li]))) {
+			lava.sdelay[li]++;
+			ctx.drawImage(lava.img, lava.sx[li], lava.sy[li], lava.sWidth[li], lava.sHeight[li], 
+				ranx, rany+r_y, lava.sWidth[li], lava.sHeight[li]);
+			lava.anim_x[li] = ranx;
+			lava.anim_y[li] = rany;
+			
+		}
+		if (lava.sdelay[li] === lava.smax)
+				lava.sdelay[li] = 0;
 	}
-	
-	ctx.drawImage(lava.img, lava.sx[1], lava.sy[1], lava.sWidth[1], lava.sHeight[1], 100, lava.y-lava.sHeight[1] + r_y, lava.sWidth[1], lava.sHeight[1]);
-	
-	//ctx.fillRect(player.x, player.y + (player.height/2) + r_y, 40, 2);
-	
+		
+	//draw the player
+	ctx.drawImage(player.img, player.rx[player.ri], player.ry[Math.floor((player.ri+1)/7)], 
+					player.rWidth[player.ri], 170, player.x, player.y + r_y, player.width, player.height);	
+		
 	//draw projectiles and explosions
 	i = 0;
 	while (i < projectile.length) {
 		//ctx.fillRect(projectile[i].x, projectile[i].y, projectile_width, projectile_height);
-		ctx.fillRect(projectile[i].x, projectile[i].y + r_y, projectile[i].width, projectile[i].height);
+		var ei = projectile[i].si;
+		ctx.drawImage(projectile[i].img, projectile[i].sx[ei], projectile[i].sy[ei], projectile[i].sWidth[ei], projectile[i].sHeight[ei], projectile[i].x, projectile[i].y + r_y, projectile[i].width, projectile[i].height);
 		i++;
 	}
 	i = 0;
@@ -456,8 +489,8 @@ function draw() {
 			i++;
 		}
 	}
+	
 	//draw the enemies
-	ctx.fillStyle = "blue";
 	i = 0;
 	while (i < enemy_list.length) {
 		var si = enemy_list[i].si
