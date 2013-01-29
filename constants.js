@@ -45,9 +45,13 @@ var death_flag = false;
 var victory_flag = false;
 var invinc_flag = false;
 
-var title_pointer = new Object();
-var game_start = false;
-var power_jump = false;
+var cannon = new Object();
+var x_diff = 0;
+var y_diff = 0;
+
+var level_end = new Object();
+var game_state = 0;
+//var power_jump = false;
 
 //enemy constants
 var enemy_height = 40;

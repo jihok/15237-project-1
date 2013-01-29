@@ -3,6 +3,7 @@ function init() {
 	canvas.addEventListener('keyup', onKeyUp, false);
 	canvas.addEventListener('keydown', onKeyDown, false);
 	canvas.addEventListener('mousedown', onMouseDown, false);
+	canvas.addEventListener('mousemove', onMouseMove, false);
 	enemy_list = [];
 	projectile = [];
 	explosion = [];
@@ -10,13 +11,16 @@ function init() {
 	bkg_img.src = "lava_background.png";
 	lava_init(); //initializes lava attributes and animation
 	player_init(); //initializes player attributes
+	cannon_init();
 	platform_init(); //creates platform objects. For now, is hardcoded, perhaps add randomization later
-	enemy_init(); //initializes enemy attributes
+	enemy_init();
+	level_end_init();
 	r_y = 0;
 	death_flag = false;
 	victory_flag = false;
-	canvas.setAttribute('tabindex','0'); 
+	canvas.setAttribute('tabindex','0');
 	canvas.focus();
+
 	intervalId = setInterval(update, timerDelay); //starts the timer
 }
 
@@ -37,7 +41,7 @@ function lava_init() {
 	lava.smax = 20;
 }
 
-//initializes player attributes. 
+//initializes player attributes
 //Sprite movement is based on an index into the arrays of src img info needed to draw the image. 
 function player_init() {
 	player.vx = 0;
@@ -63,19 +67,50 @@ function player_init() {
 	player.rHeight = [170, 170];
 	
 	player.i = 0;
-	
+}
+
+//initializes cannon attributes
+function cannon_init() {
+	cannon.x = player.x;
+	cannon.y = player.y + r_y;
+	cannon.width = 10;
+	cannon.height = 5;
+	cannon.angle = Math.atan2(y_diff,x_diff);
+}
+
+function level_end_init() {
+	level_end.x = 200;
+	level_end.y = 200 + r_y;
+	level_end.width = 30;
+	level_end.height = 45;
+	level_end.img = new Image();
+	level_end.img.src = "9_door.jpg";
 }
 
 //creates our platform objects, hardcoded as of now
 function platform_init() {
-	platform.push(new Platform(0, 400, 400, 0, 0));
-	platform.push(new Platform(100, 320, 100, 0, 0));
-	platform.push(new Platform(0, 260, 100, 0, 0));
-	platform.push(new Platform(200, 200, 100, 0, 0));
-	platform.push(new Platform(80, 140, 100, 0, 0));
-	platform.push(new Platform(0, 80, 100, 0, 0));
-	platform.push(new Platform(200, 20, 100, 0, 0));
-	platform.push(new Platform(80, -20, 100, 0, 0));
+	if(game_state <= 1) {
+		platform.push(new Platform(0, 400, 400, 0, 0));
+
+		var plat_num = 0;
+		var plat_y = 400;
+		var plat_x = Math.floor(Math.random()*300);
+		while (plat_num < 10) {
+			var next_plat_y = Math.floor(Math.random()*40) + 40;
+			plat_y -= next_plat_y;
+			platform.push(new Platform(plat_x, plat_y, 100, 0, 0));
+			var next_plat_x = Math.floor(Math.random()*150);
+			if(plat_num % 2 === 1)
+				next_plat_x += 150;
+			plat_x = next_plat_x;
+			if (plat_x > 300 || plat_x < 0)
+				plat_x = Math.floor(Math.random()*200) + Math.floor(Math.random()*100);
+			plat_num++;
+		}
+	}
+	if(game_state === 2) {
+		platform.push(new Platform(0, 400, 400, 0, 0));
+	}
 }
 
 //creates enemy objects, to be finished later
@@ -153,10 +188,13 @@ function update() {
 	//check collisions with platforms
 	player_platform_collision_handler();
 	
+	//check if player hits level end
+	victory_collision_handler();
+
 	if (!invinc_flag) {
 		player_enemy_collision_handler();
 	}
-	
+
 	//friction
 	if (player.vy === 0) {
 		player.vx -= (player.vx * 0.04);
@@ -164,6 +202,13 @@ function update() {
 	lava.y += lava.vy;
 	if (lava.y <= player.y + player.height) {
 		death_flag = true;
+	}
+	var temp = 0;
+	while (temp < enemy_list.length) {
+		if (lava.y <= enemy_list[temp].y + enemy_list[temp].height) {
+			enemy_list.splice(temp,1);
+		}
+		temp++;
 	}
 	update_projectiles();
 	detect_projectile_collision();
@@ -179,28 +224,55 @@ function update() {
 		r_y--;
 	}
 	update_enemies();
+	update_cannon();
 	draw();
-	if(game_start === false) {
+	if(game_state === 0) {
 		clearInterval(intervalId);
-		ctx.fillStyle = "white";
+		ctx.fillStyle = "black";
 		ctx.fillRect(0,0,400,500);
+		ctx.strokeStyle = "white";
+		ctx.strokeRect(115,240,170,50);
+		ctx.strokeRect(115,300,170,50);
+		ctx.strokeRect(115,360,170,50);
+		ctx.fillStyle = "white";
+		ctx.font = "60px Arial";
+		ctx.textAlign = "center";
+		ctx.fillText("Project 1",200,150);
+		ctx.font = "40px Arial";
+		ctx.fillText("Start",200,280);
+		ctx.fillText("Controls",200,340);
+		ctx.fillText("Credits",200,400);
 	}
 	if (victory_flag) {
 		clearInterval(intervalId);
+		ctx.fillStyle = "rgba(0,0,0,0.5)";
 		ctx.fillRect(0,0,400,500);
 		ctx.font = "60px Arial";
 		ctx.textAlign = "center";
-		ctx.fillText("GAME OVER",200,200);
+		ctx.fillText("Stage",200,200);
+		ctx.fillText("Cleared!",200,270);
+		ctx.font = "30px Arial";
+		ctx.fillText("Click anywhere to continue",200,350);
+		game_state++;
 	}
-	
 	if (death_flag) {
 		clearInterval(intervalId);
-		//ctx.fillRect(0,0,400,500);
+		ctx.fillStyle = "rgba(255,255,255,0.5)";
+		ctx.fillRect(0,0,400,500);
+		ctx.fillStyle = "rgb(0,0,0)";
 		ctx.font = "60px Arial";
 		ctx.textAlign = "center";
-		ctx.fillText("GAME OVER",200,200);
+		ctx.fillText("G A M E",200,200);
+		ctx.fillText("O V E R",200,270);
+		ctx.font = "30px Arial";
+		ctx.fillText("Press 'r' to restart",200,350);
 	}
-	
+}
+
+function update_cannon() {
+	cannon.x = player.x;
+	cannon.y = player.y + r_y;
+	cannon.angle = Math.atan2(y_diff,x_diff);
 }
 
 function update_player() {
@@ -382,6 +454,12 @@ function player_platform_collision_handler() {
 		}
 }
 
+//if the player hits level_end then he passes the stage
+function victory_collision_handler() {
+	if(detect_collision(player, level_end))
+		victory_flag = true;
+}
+
 //for the player, checks to see if you're in the boundaries of the canvas
 function check_inbounds() {
 	if (player.x < 0) {
@@ -402,6 +480,7 @@ function check_inbounds() {
 	}
 }
 
+
 //detects collisions, returns boolean.
 /*General purpose so can be used for any two
 objects with x,y,width,height attributes.*/
@@ -415,6 +494,7 @@ function detect_collision(obj1, obj2) {
 	return false;
 }
 
+
 //draws our board
 function draw() {
 	var i = 0;
@@ -425,7 +505,6 @@ function draw() {
 	
 	//draw the platforms
 	while (i < platform.length) {
-		//ctx.fillRect(platform[i].x, platform[i].y + r_y, platform[i].width, platform[i].height);
 		ctx.drawImage(platform[i].img, platform[i].sx, platform[i].sy, platform[i].sWidth, platform[i].sHeight, platform[i].x, platform[i].y + r_y, platform[i].width, platform[i].height);
 		i++;
 	}
@@ -452,13 +531,24 @@ function draw() {
 			
 		}
 		if (lava.sdelay[li] === lava.smax)
-				lava.sdelay[li] = 0;
+			lava.sdelay[li] = 0;
 	}
-		
+
+	//draw the cannon
+	ctx.save();
+	ctx.translate(cannon.x, cannon.y);
+	ctx.rotate(cannon.angle);
+	ctx.translate(-cannon.x, -cannon.y - r_y);
+	ctx.fillRect(cannon.x, cannon.y + r_y, cannon.width, cannon.height);
+	ctx.restore();
+	
 	//draw the player
 	ctx.drawImage(player.img, player.rx[player.ri], player.ry[Math.floor((player.ri+1)/7)], 
 					player.rWidth[player.ri], 170, player.x, player.y + r_y, player.width, player.height);	
-		
+	
+	//draw the level end
+	ctx.drawImage(level_end.img,level_end.x,level_end.y+r_y,level_end.width,level_end.height);
+
 	//draw projectiles and explosions
 	i = 0;
 	while (i < projectile.length) {
