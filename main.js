@@ -54,7 +54,7 @@ function player_init() {
 	
 	player.img = new Image();
 	player.img.src = "megaman_run.png";
-
+	
 	player.ri = 0; //running index to determine which sprite is drawn in movement
 	player.rright = 5; //right movements are sprites 0-5
 	player.rleft = 11; //left movements are sprites 6-11
@@ -71,16 +71,23 @@ function player_init() {
 
 //initializes cannon attributes
 function cannon_init() {
-	cannon.x = player.x;
-	cannon.y = player.y + r_y;
-	cannon.width = 10;
-	cannon.height = 5;
+	cannon.x = player.x+player.width-10; //subtract a little so the hand is actually holding it
+	cannon.y = player.y + r_y+(player.height/2);
+	cannon.width = 20;
+	cannon.height = 10;
 	cannon.angle = Math.atan2(y_diff,x_diff);
+	cannon.img = new Image();
+	cannon.img.src = "gun.png";
+	cannon.sx = [0,33];
+	cannon.sy = [0,0];
+	cannon.sWidth = [30,35];
+	cannon.sHeight = [20,20];
+	cannon.i = 0;
 }
 
 function level_end_init() {
 	level_end.x = 200;
-	level_end.y = 200 + r_y;
+	level_end.y = 600 + r_y; //where is this supposed to be?!?!
 	level_end.width = 30;
 	level_end.height = 45;
 	level_end.img = new Image();
@@ -165,10 +172,10 @@ function update() {
 		//player.vx = Math.min(player.vx + .06, max_speed);
     }
 	
-	if (player.vy < 0 && player.vx < 0) {
+	if (player.vy < 0 && key_pressed_left) {
 		player.ri = 7;
 	}
-	else if (player.vy < 0 && player.vx > 0) {
+	else if (player.vy < 0 && key_pressed_right) {
 		player.ri = 1;
 	}
 	player.width = (player.rWidth[player.ri]/player.rWidth[0])*player.width_min;
@@ -270,13 +277,16 @@ function update() {
 }
 
 function update_cannon() {
-	cannon.x = player.x;
-	cannon.y = player.y + r_y;
+	if (key_pressed_right) {
+		cannon.si = 0; //right gun sprite
+		cannon.x = player.x+player.width-10; //subtract a little so player hand is "holding" gun
+	}
+	else if (key_pressed_left) {
+		cannon.si = 1; //left gun sprite
+		cannon.x = player.x+10;
+	}
+	cannon.y = player.y + r_y +(player.height/2);
 	cannon.angle = Math.atan2(y_diff,x_diff);
-}
-
-function update_player() {
-
 }
 
 function update_platforms() {
@@ -534,17 +544,21 @@ function draw() {
 			lava.sdelay[li] = 0;
 	}
 
+	//draw the player
+	ctx.drawImage(player.img, player.rx[player.ri], player.ry[Math.floor((player.ri+1)/7)], 
+					player.rWidth[player.ri], 170, player.x, player.y + r_y, player.width, player.height);
+					
 	//draw the cannon
 	ctx.save();
 	ctx.translate(cannon.x, cannon.y);
 	ctx.rotate(cannon.angle);
 	ctx.translate(-cannon.x, -cannon.y - r_y);
-	ctx.fillRect(cannon.x, cannon.y + r_y, cannon.width, cannon.height);
+	ctx.drawImage(cannon.img, cannon.sx[cannon.si], cannon.sy[cannon.si], 
+				cannon.sWidth[cannon.si], cannon.sHeight[cannon.si], 
+				cannon.x, cannon.y + r_y, cannon.width, cannon.height);
+	//ctx.fillRect(cannon.x, cannon.y + r_y, cannon.width, cannon.height);
 	ctx.restore();
 	
-	//draw the player
-	ctx.drawImage(player.img, player.rx[player.ri], player.ry[Math.floor((player.ri+1)/7)], 
-					player.rWidth[player.ri], 170, player.x, player.y + r_y, player.width, player.height);	
 	
 	//draw the level end
 	ctx.drawImage(level_end.img,level_end.x,level_end.y+r_y,level_end.width,level_end.height);
