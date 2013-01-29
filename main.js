@@ -7,6 +7,7 @@ function init() {
 	enemy_list = [];
     enemy2_list = [];
 	projectile = [];
+    enemy_projectile = [];
 	explosion = [];
 	platform = [];
 	player_init(); //initializes player attributes
@@ -58,18 +59,6 @@ function player_init() {
 	
 }
 
-//creates our platform objects, hardcoded as of now
-/*function platform_init() {
-	platform.push(new Platform(0, 400, 400, 0, 0));
-	platform.push(new Platform(100, 320, 100, 60, 0));
-	platform.push(new Platform(0, 260, 100, 0, 0));
-	platform.push(new Platform(200, 200, 100, 0, 0));
-	platform.push(new Platform(80, 140, 100, 0, 0));
-	platform.push(new Platform(0, 80, 100, 0, 0));
-	platform.push(new Platform(200, 20, 100, 0, 0));
-	platform.push(new Platform(80, -20, 100, 0, 0));
-}*/
-
 //creates enemy objects, to be finished later
 function enemy_init() {
 	var i = 0;
@@ -108,7 +97,6 @@ function update() {
 		else {
 			player.rundelay = 0;
 			player.ri++;
-			//console.log(player.ri, player.rundelay);
 			if (player.ri === 12)
 				player.ri = 7;
 		}
@@ -124,7 +112,6 @@ function update() {
 		else {
 			player.rundelay = 0;
 			player.ri++;
-			//console.log(player.ri, player.rundelay);
 			if (player.ri === 6)
 				player.ri = 0;
 		}
@@ -132,14 +119,9 @@ function update() {
 		player.vx += 0.06;
 		//player.vx = Math.min(player.vx + .06, max_speed);
     }
-	//console.log(platform[0].vx);
 	player.x += player.vx + platform[player.i].vx;
 	player.y += player.vy ;//+ platform[player.i].vy;
 	update_platforms();
-	/*if (Math.abs(player.vy) >= 2*gravity) {
-        player.vx += platform[player.i].vx;
-		player.i = 0;
-	}*/
 	//gives constant accleration downwards
 	player.vy += gravity;
 	//player.vy = Math.min(player.vy + gravity, free_fall_speed);
@@ -205,7 +187,9 @@ function enemy_fire() {
         enemy = enemy2_list[i];
         if ((Math.abs(enemy.x - player.x) < canvas.width/2)
             && (Math.abs(enemy.y - player.y) < canvas.height/2)) {
-                
+                if (enemy.lastFired > fireRate) {
+                    enemy_projectile.push(new Enemy_projectile(i));
+                }
             }
             i++;
     }
@@ -257,7 +241,6 @@ function update_enemies(e_list) {
 		else {
 			enemy.sdelay = 0;
 			enemy.si++;
-			//console.log(enemy.si, enemy.sdelay);
 			if (enemy.si === 10 && enemy.vx > 0)
 				enemy.si = 5;
 			else if (enemy.si === 5 && enemy.vx < 0)
@@ -322,7 +305,6 @@ function detect_projectile_collision() {
 			if (detect_collision(projectile[i], enemy_list[k])) {
 				detected = true;
 				handle_projectile_enemy_collision(i,k);
-				//console.log('supss');
 			}
 			k++;
 		}
@@ -515,6 +497,8 @@ function init() {
 	canvas.addEventListener('mousedown', onMouseDown, false);
 	canvas.addEventListener('mousemove', onMouseMove, false);
 	enemy_list = [];
+    enemy2_list = [];
+    enemy_projectile = [];
 	projectile = [];
 	explosion = [];
 	platform = [];
@@ -524,6 +508,7 @@ function init() {
 	cannon_init();
 	platform_init(); //creates platform objects. For now, is hardcoded, perhaps add randomization later
 	enemy_init();
+    enemy2_init();
 	level_end_init();
 	r_y = 0;
 	death_flag = false;
@@ -635,16 +620,6 @@ function platform_init() {
 	}
 }
 
-//creates enemy objects, to be finished later
-function enemy_init() {
-	var i = 0;
-	while (i < platform.length) {
-		if (platform[i].y < 390) { //tihs is just so it doesnt spawn on base platform which is annoying
-			enemy_list.push(new Enemy(platform[i].x, platform[i].y, platform[i].width, i));
-		}
-		i++;
-	}
-}
 
 //equivalent of onTimer. this is what we do every "tick".
 //Currently code is rather complicated and maybe should be
@@ -813,7 +788,6 @@ function update_platforms() {
 	while (i < platform.length) {
 		plat = platform[i];
 		plat.x += plat.vx;
-        console.log(plat.vx);
 		plat.y += plat.vy;
 		if (plat.x <= plat.left) {
 			plat.vx = Math.abs(plat.vx);
@@ -856,7 +830,6 @@ function update_enemies() {
 		else {
 			enemy.sdelay = 0;
 			enemy.si++;
-			//console.log(enemy.si, enemy.sdelay);
 			//moving right and last right sprite so reset to first right sprite
 			if (enemy.si > (enemy.sleft) && enemy.vx > 0)
 				enemy.si = (enemy.sright+1);
@@ -901,7 +874,7 @@ function detect_projectile_collision() {
 	var detected = false;
 	while (i < projectile.length) {
 		j = 0;
-		while (j < platform.length && (detected === false)) {
+		while (detected === false && (j < platform.length)) {
 			if (detect_collision(projectile[i], platform[j])) {
 				//projectile.splice(i, 1);
 				detected = true;
@@ -910,20 +883,18 @@ function detect_projectile_collision() {
 			j++;
 		}
         	
-        if (((projectile[i].x < 0) 
-            || (projectile[i].x + projectile[i].width > canvas.width))
-            && (detected === false)){
+        if ((detected === false) && ((projectile[i].x < 0) 
+            || (projectile[i].x + projectile[i].width > canvas.width))) {
             explosion.push(new Explosion(projectile[i].x, projectile[i].y));
-            projectile.splice(i,1);
             detected = true;
+            projectile.splice(i,1);
         }
         
 		k = 0;
-		while (k < enemy_list.length && (detected === false)) {
+		while ((detected === false) && (k < enemy_list.length)) {
 			if (detect_collision(projectile[i], enemy_list[k])) {
 				detected = true;
 				handle_projectile_enemy_collision(i,k);
-				//console.log('supss');
 			}
 			k++;
 		}
@@ -994,8 +965,6 @@ function player_platform_collision_handler() {
                         player.vy = platform[i].vy;
                     }
                     //player.vx += platform[i].vx;
-					//console.log('fml');
-                    console.log("floor");
 				} else  {
 					player.y = player.y - player.vy;//platform[i].y + platform[i].height;
 					player.vy = 0;
@@ -1152,6 +1121,11 @@ function draw() {
 		//ctx.fillRect(enemy_list[i].x, enemy_list[i].y + r_y, enemy_list[i].width, enemy_list[i].height);
 		i++;
 	}
+    i = 0;
+    while (i < enemy2_list.length) {
+        ctx.fillRect(enemy2_list[i].x, enemy2_list[i].y + r_y, enemy2_list[i].width, enemy2_list[i].height);
+        i++;
+    }
 }
 
 init();

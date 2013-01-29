@@ -6,6 +6,7 @@ var platform = []; //list of platform objects
 var enemy_list = [];
 var enemy2_list = [];
 var projectile = [];
+var enemy_projectile = [];
 var explosion = [];
 var bkg_img = new Image();
 var canvas = document.getElementById("myCanvas");
@@ -65,4 +66,4 @@ var enemy2_width = 10;
 var enemy2_speed = .22;
 var enemy2_fire_rate = 60;
 
-//var enemy_speed = 2.3;
+var enemy_projectile_speed = 2;     

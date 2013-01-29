@@ -7,7 +7,6 @@ var explosion_diameter = 40;
 function Platform(x, y, width, horizontal, vertical) {
 	//horizontal = 0;
 	//vertical = 0;
-    console.log(horizontal);
 	this.x = x;
 	this.y = y;
 	this.width = width;
@@ -26,13 +25,13 @@ function Platform(x, y, width, horizontal, vertical) {
 	this.sHeight = 70;
 }
 
-function Enemy_projectile(x,y, i) {
+function Enemy_projectile(i) {
     var enemy = enemy2_list[i];
-	var center_x = player.x + (player.width/2) - (projectile_width/2);
-	var center_y = player.y + (player.height/2) - (projectile_height/2);
-	var hypotenuse = Math.sqrt( Math.pow(x - center_x,2) + Math.pow(y - center_y,2));
-	this.vx = projectile_speed * ((x - center_x)/hypotenuse);
-	this.vy = projectile_speed * ((y - center_y)/hypotenuse);
+	var center_x = enemy.x + (enemy.width/2) - (projectile_width/2);
+	var center_y = enemy.y + (enemy.height/2) - (projectile_height/2);
+	var hypotenuse = Math.sqrt( Math.pow(player.x - center_x,2) + Math.pow(player.y - center_y,2));
+	this.vx = projectile_speed * ((player.x - center_x)/hypotenuse);
+	this.vy = projectile_speed * ((player.y - center_y)/hypotenuse);
 	this.x = center_x - (projectile_width/2);
 	this.y = center_y - (projectile_height/2);
 	this.time = 0;
@@ -94,6 +93,8 @@ function Enemy2(x, y, width, i) {
     this.width = enemy2_width;
     this.height = enemy2_height;
     this.i = i;
+    this.lastFired = 30;
+    console.log('x');
 }
 
 function Explosion(x,y) {
