@@ -64,7 +64,7 @@ function Explosion(x,y) {
 	this.time = 0;
 	this.img = new Image();
 	this.img.src = "explosion_1.png";
-	this.si = 2;
+	this.si = 1;
 	this.sx = [0,14,35,64];
 	this.sy = [16,10,2,1];
 	this.sWidth = [10,16,25,25];

@@ -231,7 +231,7 @@ function update() {
 	}
 	if (death_flag) {
 		clearInterval(intervalId);
-		ctx.fillStyle = "rgba(255,255,255,0.9)";
+		ctx.fillStyle = "rgba(255,255,255,0.5)";
 		ctx.fillRect(0,0,400,500);
 		ctx.fillStyle = "rgb(0,0,0)";
 		ctx.font = "60px Arial";
@@ -479,7 +479,7 @@ function draw() {
 	
 	//draw the platforms
 	while (i < platform.length) {
-		ctx.fillRect(platform[i].x, platform[i].y + r_y, platform[i].width, platform[i].height);
+		ctx.drawImage(platform[i].img, platform[i].sx, platform[i].sy, platform[i].sWidth, platform[i].sHeight, platform[i].x, platform[i].y + r_y, platform[i].width, platform[i].height);
 		i++;
 	}
 
