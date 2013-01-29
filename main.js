@@ -8,21 +8,13 @@ function init() {
 	projectile = [];
 	explosion = [];
 	platform = [];
+	bkg_img.src = "lava_background.png";
+	lava_init(); //initializes lava attributes and animation
 	player_init(); //initializes player attributes
 	cannon_init();
 	platform_init(); //creates platform objects. For now, is hardcoded, perhaps add randomization later
 	enemy_init();
 	level_end_init();
-	lava.y = 500;
-	lava.vy = -.05;
-	lava.img = new Image();
-	lava.img.src = "lava.png";
-	lava.sx = [130, 100];
-	lava.sy = [690, 660];
-	lava.sWidth = [60, 20];
-	lava.sHeight = [10, 40];
-	lava.si = 0;
-	lava.sdelay = 0;
 	r_y = 0;
 	death_flag = false;
 	victory_flag = false;
@@ -32,30 +24,49 @@ function init() {
 	intervalId = setInterval(update, timerDelay); //starts the timer
 }
 
+//initializes lava attributes
+function lava_init() {
+	lava.y = 500;
+	lava.vy = -.05; //rate of lava flow
+	lava.img = new Image();
+	lava.img.src = "lava1.png";
+
+	lava.anim_x = [0,0,0,0,0,0,0,0];
+	lava.anim_y = [0,0,0,0,0,0,0,0];
+	lava.sx = [0, 0, 195, 290, 290, 0, 0, 290];
+	lava.sy = [0, 160, 148, 235, 235, 160, 160, 235];
+	lava.sWidth = [120, 60, 40, 65, 65, 60, 60, 65];
+	lava.sHeight = [60, 10, 25, 7, 7, 10, 10, 7];
+	lava.sdelay = [0,0,0,0,0,0,0,0];
+	lava.smax = 20;
+}
+
 //initializes player attributes
+//Sprite movement is based on an index into the arrays of src img info needed to draw the image. 
 function player_init() {
 	player.vx = 0;
 	player.vy = 0;
 	player.x = 0;
 	player.y = 360;
-	player.width = 17; //slightly smaller than actual img to account for player not actually "colliding" with enemy
+
+	player.width_min = 24; //slightly smaller than actual img width to account for player not actually appearing to "collide" with enemy 
 	player.height = 40;
+	
 	player.img = new Image();
 	player.img.src = "megaman_run.png";
-	player.ri = 0; //0-5 for right, 6-11 for left
-	player.rundelay = 0; //TODO: make this a function of velocity
-	player.runx = [0,150,360,480,360,150, 0,160,280,480,280,160];
-	player.runy = [0, 190];
-	player.runwidth = [150,190,120,160,120,190, 160,100,190,150,190,100];
-	player.runheight = [170, 170];
-	/*
-	player.sx = 0;
-	player.sy = 0;
-	player.sWidth = 50;
-	player.sHeight = 103;
-	*/
-	player.i = 0;
+
+	player.ri = 0; //running index to determine which sprite is drawn in movement
+	player.rright = 5; //right movements are sprites 0-5
+	player.rleft = 11; //left movements are sprites 6-11
+	player.rdelay = 0; //determines when next sprite is drawn
+	player.rdelay_max = 5; //delays sprite image change so movement looks less choppy. TODO: make this a function of velocity	
+	//source img x, y coordinates and width/height
+	player.rx = [0,160,360,480,360,160, 480,290,160,0,160,290];
+	player.ry = [0, 180];
+	player.rWidth = [150,180,110,150,120,190, 150,180,110,150,110,180];
+	player.rHeight = [170, 170];
 	
+	player.i = 0;
 }
 
 //initializes cannon attributes
@@ -105,39 +116,46 @@ function update() {
 	
 	//movement is done indirectly by giving a player acceleration.
 	//note you can only accelerate
+	//moving left only (player.ri: 6-11)
     if (key_pressed_left && player.vy === 0) {
-		if (player.ri < 6)
-			player.ri = 6;
-		if (player.rundelay !== 3)
-			player.rundelay++;
+		if (player.ri <= (player.rright)) //changing direction from right to left
+			player.ri = (player.rright); //
+		if (player.rdelay !== player.rdelay_max) 
+			player.rdelay++;
 		else {
-			player.rundelay = 0;
-			player.ri++;
-			//console.log(player.ri, player.rundelay);
-			if (player.ri === 12)
-				player.ri = 7;
+			player.rdelay = 0; //reset delay
+			player.ri++; //draw next sprite
+			if (player.ri === (player.rleft+1)) //last left sprite so reset to first left sprite
+				player.ri = (player.rright+1);
 		}
 		
 		player.vx -= 0.06;
 		//player.vx = Math.max(player.vx - .06, -1 * max_speed);
 	}
+	//moving right only (player.ri: 0-5)
     if (key_pressed_right && player.vy === 0) {
-		if (player.ri > 5)
+		if (player.ri > player.rright) //changing direction from left to right
 			player.ri = 0;
-		if (player.rundelay !== 3)
-			player.rundelay++;
+		if (player.rdelay !== player.rdelay_max)
+			player.rdelay++;
 		else {
-			player.rundelay = 0;
-			player.ri++;
-			//console.log(player.ri, player.rundelay);
-			if (player.ri === 6)
+			player.rdelay = 0; //reset delay
+			player.ri++; //draw next sprite
+			if (player.ri === (player.rright+1)) //last right sprite so reset to first right sprite
 				player.ri = 0;
 		}
 		
 		player.vx += 0.06;
 		//player.vx = Math.min(player.vx + .06, max_speed);
     }
-	//console.log(platform[0].vx);
+	
+	if (player.vy < 0 && player.vx < 0) {
+		player.ri = 7;
+	}
+	else if (player.vy < 0 && player.vx > 0) {
+		player.ri = 1;
+	}
+	player.width = (player.rWidth[player.ri]/player.rWidth[0])*player.width_min;
 	player.x += player.vx + platform[player.i].vx;
 	player.y += player.vy + platform[player.i].vy;
 	update_platforms();
@@ -154,12 +172,13 @@ function update() {
 	//check collisions with platforms
 	player_platform_collision_handler();
 	
+	//check if player hits level end
 	victory_collision_handler();
 
 	if (!invinc_flag) {
 		player_enemy_collision_handler();
 	}
-	
+
 	//friction
 	if (player.vy === 0) {
 		player.vx -= (player.vx * 0.04);
@@ -230,6 +249,10 @@ function update_cannon() {
 	cannon.angle = Math.atan2(y_diff,x_diff);
 }
 
+function update_player() {
+
+}
+
 function update_platforms() {
 	var i =0;
 	var plat;
@@ -262,10 +285,12 @@ function update_enemies() {
 	while (i < enemy_list.length) {
 		enemy = enemy_list[i];
 		plat = platform[enemy.i];
+		//going left, turn right
 		if (enemy.x <= plat.x + 5) {
 			enemy.vx = Math.abs(enemy.vx);
-			enemy.si = 5;
+			enemy.si = enemy.sright+1;
 		}
+		//going right, turn left
 		else if (enemy.x + enemy.width >= plat.x + plat.width - 5) {
 			enemy.vx = -Math.abs(enemy.vx);
 			enemy.si = 0;
@@ -273,17 +298,18 @@ function update_enemies() {
 		
 		enemy.x += enemy.vx + plat.vx;
 		enemy.y = plat.y - enemy.height;
-		if (enemy.sdelay !== 3)
+		if (enemy.sdelay !== enemy.smax)
 			enemy.sdelay++;
 		else {
 			enemy.sdelay = 0;
 			enemy.si++;
 			//console.log(enemy.si, enemy.sdelay);
-			if (enemy.si === 10 && enemy.vx > 0)
-				enemy.si = 5;
-			else if (enemy.si === 5 && enemy.vx < 0)
+			//moving right and last right sprite so reset to first right sprite
+			if (enemy.si > (enemy.sleft) && enemy.vx > 0)
+				enemy.si = (enemy.sright+1);
+			//moving left and last left sprite so reset to first left sprite
+			else if (enemy.si > (enemy.sright) && enemy.vx < 0)
 				enemy.si = 0;
-				
 		}
 	i++;
 	}
@@ -303,7 +329,6 @@ function player_enemy_collision_handler() {
 function update_projectiles() {
 	var i = 0;
 	while (i < projectile.length) {
-	
 		//PERHAPS NOT NEEDED
 		if (projectile[i].time === 200) {
 			projectile.shift();
@@ -403,6 +428,7 @@ function player_platform_collision_handler() {
 		}
 }
 
+//if the player hits level_end then he passes the stage
 function victory_collision_handler() {
 	if(detect_collision(player, level_end))
 		victory_flag = true;
@@ -446,14 +472,42 @@ function detect_collision(obj1, obj2) {
 //draws our board
 function draw() {
 	var i = 0;
+	ctx.clearRect(0,0,canvas.width,canvas.height);
 	
-	ctx.clearRect(0,0,400,500);
-	ctx.fillStyle = "black";
-		//ctx.fillRect(player.x, player.y + r_y, 40,40);
+	//draw the background
+	ctx.drawImage(bkg_img, 0, 0, bkg_img.width, bkg_img.height, 0, 0, canvas.width, canvas.height);
+	
+	//draw the platforms
 	while (i < platform.length) {
 		ctx.fillRect(platform[i].x, platform[i].y + r_y, platform[i].width, platform[i].height);
 		i++;
 	}
+
+	//draw the lava
+	ctx.fillStyle = "red";
+	ctx.fillRect(0, lava.y + r_y, canvas.width, canvas.height - lava.y);
+	for (var li = 0; li < lava.sx.length; li++) {
+		var ran = Math.random();
+		var ranx = Math.random()*canvas.width;
+		var rany = canvas.height-Math.random()*(canvas.height-lava.y);
+		
+		if (lava.sdelay[li] > 0) {
+			lava.sdelay[li]++;
+			ctx.drawImage(lava.img, lava.sx[li], lava.sy[li], lava.sWidth[li], lava.sHeight[li], 
+				lava.anim_x[li], lava.anim_y[li]+r_y, lava.sWidth[li], lava.sHeight[li]);
+		}
+		else if (ran > 0.5 && (lava.y < (canvas.height - lava.sHeight[li]))) {
+			lava.sdelay[li]++;
+			ctx.drawImage(lava.img, lava.sx[li], lava.sy[li], lava.sWidth[li], lava.sHeight[li], 
+				ranx, rany+r_y, lava.sWidth[li], lava.sHeight[li]);
+			lava.anim_x[li] = ranx;
+			lava.anim_y[li] = rany;
+			
+		}
+		if (lava.sdelay[li] === lava.smax)
+			lava.sdelay[li] = 0;
+	}
+
 	//draw the cannon
 	ctx.save();
 	ctx.translate(cannon.x, cannon.y);
@@ -463,23 +517,15 @@ function draw() {
 	ctx.restore();
 	
 	//draw the player
-	ctx.drawImage(player.img, player.runx[player.ri], player.runy[Math.floor(player.ri/7)], 
-					player.runwidth[player.ri], 170, player.x, player.y + r_y, 24, 40);
-
-	ctx.fillStyle = "red";
-	console.log(canvas.height);
-	ctx.fillRect(0, lava.y + r_y, canvas.width, canvas.height - lava.y);
-	if (lava.y < (canvas.height - lava.sHeight[0])) {
-		ctx.drawImage(lava.img, lava.sx[0], lava.sy[0], lava.sWidth[0], lava.sHeight[0], 20, lava.y + r_y, lava.sWidth[0], lava.sHeight[0]);
-	}
-	
-	ctx.drawImage(lava.img, lava.sx[1], lava.sy[1], lava.sWidth[1], lava.sHeight[1], 100, lava.y-lava.sHeight[1] + r_y, lava.sWidth[1], lava.sHeight[1]);
-	
-	//ctx.fillRect(player.x, player.y + (player.height/2) + r_y, 40, 2);
+	ctx.drawImage(player.img, player.rx[player.ri], player.ry[Math.floor((player.ri+1)/7)], 
+					player.rWidth[player.ri], 170, player.x, player.y + r_y, player.width, player.height);	
+		
+	//draw projectiles and explosions
 	i = 0;
 	while (i < projectile.length) {
 		//ctx.fillRect(projectile[i].x, projectile[i].y, projectile_width, projectile_height);
-		ctx.fillRect(projectile[i].x, projectile[i].y + r_y, projectile[i].width, projectile[i].height);
+		var ei = projectile[i].si;
+		ctx.drawImage(projectile[i].img, projectile[i].sx[ei], projectile[i].sy[ei], projectile[i].sWidth[ei], projectile[i].sHeight[ei], projectile[i].x, projectile[i].y + r_y, projectile[i].width, projectile[i].height);
 		i++;
 	}
 	i = 0;
@@ -493,7 +539,9 @@ function draw() {
 		//simply sharing the same corner as the projectile.
 		
 		//ctx.fillRect(explosion[i].x - explosion_diameter/2, explosion[i].y - explosion_diameter/2, explosion_diameter, explosion_diameter);
-		ctx.fillRect(explosion[i].x - explosion[i].width/2, explosion[i].y - explosion[i].height/2 + r_y, explosion[i].width, explosion[i].height);
+		var ei = explosion[i].si;
+		ctx.drawImage(explosion[i].img, explosion[i].sx[ei], explosion[i].sy[ei], explosion[i].sWidth[ei], explosion[i].sHeight[ei], explosion[i].x - explosion[i].width/2, explosion[i].y - explosion[i].height/2 + r_y, explosion[i].width, explosion[i].height);
+		//ctx.fillRect(explosion[i].x - explosion[i].width/2, explosion[i].y - explosion[i].height/2 + r_y, explosion[i].width, explosion[i].height);
 		explosion[i].time +=1;
 		if (explosion[i].time === explosion_timeout) {
 			explosion.splice(i,1);
@@ -504,7 +552,6 @@ function draw() {
 	}
 	
 	//draw the enemies
-	ctx.fillStyle = "blue";
 	i = 0;
 	while (i < enemy_list.length) {
 		var si = enemy_list[i].si
@@ -513,9 +560,6 @@ function draw() {
 		//ctx.fillRect(enemy_list[i].x, enemy_list[i].y + r_y, enemy_list[i].width, enemy_list[i].height);
 		i++;
 	}
-
-
-
 	//draw the level end
 	ctx.fillRect(level_end.x,level_end.y,level_end.width,level_end.height);
 }

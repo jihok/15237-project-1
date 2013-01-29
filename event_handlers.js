@@ -1,9 +1,9 @@
 function onKeyDown(event) {
 	if(game_state > 0) {
 		//going left
-	    if (event.keyCode === 65) {
-	        key_pressed_left = true;
-	    }
+		if (event.keyCode === 65) {
+			key_pressed_left = true;
+		}
 		//going right
 		else if (event.keyCode === 68) {
 			key_pressed_right = true;
@@ -83,6 +83,8 @@ function onMouseMove(event) {
 	var cursor_y = event.pageY;
 
 	//for the cannon rotation angle
-	if (cursor_x !== undefined) x_diff = cursor_x - cannon.x;
-	if (cursor_y !== undefined) y_diff = cursor_y - cannon.y;
+	if (cursor_x !== undefined)
+		x_diff = cursor_x - cannon.x;
+	if (cursor_y !== undefined)
+		y_diff = cursor_y - cannon.y;
 }

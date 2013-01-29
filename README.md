@@ -51,5 +51,9 @@ Jiho:
 Norbert:
 
 *enemy speedup and move towards player
-
 *randomly generated platform method
+
+
+Credits:
+lava sprites: http://www.spriters-resource.com/ds/megamanzx/sheet/76
+background img: http://www.michaelspornanimation.com/splog/?p=3080
