@@ -187,6 +187,13 @@ function update() {
 	if (lava.y <= player.y + player.height) {
 		death_flag = true;
 	}
+	var temp = 0;
+	while (temp < enemy_list.length) {
+		if (lava.y <= enemy_list[temp].y + enemy_list[temp].height) {
+			enemy_list.splice(temp,1);
+		}
+		temp++;
+	}
 	update_projectiles();
 	detect_projectile_collision();
 	//redraw the board
