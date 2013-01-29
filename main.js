@@ -4,12 +4,14 @@ function init() {
 	canvas.addEventListener('keydown', onKeyDown, false);
 	canvas.addEventListener('mousedown', onMouseDown, false);
 	enemy_list = [];
+    enemy2_list = [];
 	projectile = [];
 	explosion = [];
 	platform = [];
 	player_init(); //initializes player attributes
 	platform_init(); //creates platform objects. For now, is hardcoded, perhaps add randomization later
 	enemy_init();
+    enemy2_init();
 	lava.y = 500;
 	lava.vy = -.05;
 	lava.img = new Image();
@@ -58,7 +60,7 @@ function player_init() {
 //creates our platform objects, hardcoded as of now
 function platform_init() {
 	platform.push(new Platform(0, 400, 400, 0, 0));
-	platform.push(new Platform(100, 320, 100, 0, 0));
+	platform.push(new Platform(100, 320, 100, 60, 0));
 	platform.push(new Platform(0, 260, 100, 0, 0));
 	platform.push(new Platform(200, 200, 100, 0, 0));
 	platform.push(new Platform(80, 140, 100, 0, 0));
@@ -70,12 +72,23 @@ function platform_init() {
 //creates enemy objects, to be finished later
 function enemy_init() {
 	var i = 0;
+    var type = "";
 	while (i < platform.length) {
 		if (platform[i].y < 390) { //tihs is just so it doesnt spawn on base platform which is annoying
 			enemy_list.push(new Enemy(platform[i].x, platform[i].y, platform[i].width, i));
 		}
-		i++;
+		i += 2;
 	}
+}
+
+function enemy2_init() {
+    var i = 1;
+    while (i < platform.length) {
+        if (platform[i].y < 390) {
+            enemy2_list.push(new Enemy2(platform[i].x, platform[i].y, platform[i].width, i));
+        }
+        i += 2;
+    }
 }
 
 //equivalent of onTimer. this is what we do every "tick".
@@ -120,9 +133,10 @@ function update() {
     }
 	//console.log(platform[0].vx);
 	player.x += player.vx + platform[player.i].vx;
-	player.y += player.vy + platform[player.i].vy;
+	player.y += player.vy ;//+ platform[player.i].vy;
 	update_platforms();
 	if (Math.abs(player.vy) >= 2*gravity) {
+        player.vx += platform[player.i].vx;
 		player.i = 0;
 	}
 	//gives constant accleration downwards
@@ -160,7 +174,8 @@ function update() {
 	else if (player.y + r_y > threshold_down) {
 		r_y--;
 	}
-	update_enemies();
+	update_enemies(enemy_list);
+    update_enemies(enemy2_list);
 	draw();
 	if(game_start === false) {
 		clearInterval(intervalId);
@@ -185,9 +200,7 @@ function update() {
 function update_platforms() {
 	var i =0;
 	var plat;
-    console.log("moving platforms");
 	while (i < platform.length) {
-        console.log("" + i + " is i");
 		plat = platform[i];
 		plat.x += plat.vx;
 		plat.y += plat.vy;
@@ -207,12 +220,12 @@ function update_platforms() {
 	}
 }
 
-function update_enemies() {
+function update_enemies(e_list) {
 	var i = 0;
 	var plat;
 	var enemy;
-	while (i < enemy_list.length) {
-		enemy = enemy_list[i];
+	while (i < e_list.length) {
+		enemy = e_list[i];
 		plat = platform[enemy.i];
 		if (enemy.x <= plat.x + 5) {
 			enemy.vx = Math.abs(enemy.vx);
@@ -283,6 +296,13 @@ function detect_projectile_collision() {
 			}
 			j++;
 		}
+        if (((projectile[i].x < 0) 
+            || (projectile[i].x + projectile[i].width > canvas.width))
+            && (detected === false)){
+            explosion.push(new Explosion(projectile[i].x, projectile[i].y));
+            projectile.splice(i,1);
+            detected = true;
+        }
 		k = 0;
 		while (k < enemy_list.length && (detected === false)) {
 			if (detect_collision(projectile[i], enemy_list[k])) {
@@ -335,20 +355,39 @@ function player_platform_collision_handler() {
 				because that might leave a small gap between
 				the two objects instead of having them touch like you'd expect.*/
 				//colliding sets velocity to 0 and position accordingly.
-				if (player.x - player.vx + player.width <= platform[i].x) {
+                
+				if (player.x - player.vx + platform[i].vx + player.width <= platform[i].x) {
 					player.x = platform[i].x - player.width;
 					player.vx = 0;
-				} else if (player.x - player.vx >= platform[i].x + platform[i].width) {
+                    if (platform[i].vx < 0 ) {
+                        player.x += platform[i].vx;
+                        player.vx = platform[i].vx;
+                    }
+				} else if (player.x - player.vx + platform[i].vx >= platform[i].x + platform[i].width) {
 						player.x = platform[i].x + platform[i].width;
 						player.vx = 0;
-				} else if (player.y - player.vy + player.height <= platform[i].y) {
+                        if (platform[i].vx > 0) {
+                            player.x += platform[i].vx;
+                            player.vx = platform[i].vx;
+                        }
+				} else if (player.y - player.vy + player.height + platform[i].vy <= platform[i].y) {
 					player.y = platform[i].y - player.height;
 					player.vy = 0;
 					player.i = i;
+                    if (platform[i].vy < 0) {
+                        player.y += platform[i].vy;
+                        player.vy = platform[i].vy;
+                    }
+                    //player.vx += platform[i].vx;
 					//console.log('fml');
+                    console.log("floor");
 				} else  {
 					player.y = player.y - player.vy;//platform[i].y + platform[i].height;
 					player.vy = 0;
+                    if (platform[i].vy > 0) {
+                        player.y += platform[i].vy;
+                        player.vy = platform[i].vy;
+                    }
 				}
 			}
 			i++;
@@ -405,7 +444,6 @@ function draw() {
 					player.runwidth[player.ri], 170, player.x, player.y + r_y, 24, 40);
 
 	ctx.fillStyle = "red";
-	console.log(canvas.height);
 	ctx.fillRect(0, lava.y + r_y, canvas.width, canvas.height - lava.y);
 	if (lava.y < (canvas.height - lava.sHeight[0])) {
 		ctx.drawImage(lava.img, lava.sx[0], lava.sy[0], lava.sWidth[0], lava.sHeight[0], 20, lava.y + r_y, lava.sWidth[0], lava.sHeight[0]);
@@ -451,6 +489,12 @@ function draw() {
 		//ctx.fillRect(enemy_list[i].x, enemy_list[i].y + r_y, enemy_list[i].width, enemy_list[i].height);
 		i++;
 	}
+    i = 0;
+    ctx.fillStyle = "purple";
+    while (i < enemy2_list.length) {
+        ctx.fillRect(enemy2_list[i].x, enemy2_list[i].y + r_y, enemy2_list[i].width, enemy2_list[i].height);
+        i++;
+    }
 }
 
 init();

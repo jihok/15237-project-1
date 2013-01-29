@@ -4,6 +4,7 @@ var lastFired = fireRate + 1;
 var lava = new Object();
 var platform = []; //list of platform objects
 var enemy_list = [];
+var enemy2_list = [];
 var projectile = [];
 var explosion = [];
 var canvas = document.getElementById("myCanvas");
@@ -53,5 +54,12 @@ var power_jump = false;
 //enemy constants
 var enemy_height = 40;
 var enemy_width = 30;
-var enemy_speed = 0.5;
+var enemy_speed = 0.3;
+
+//enemy type 2 constants
+var enemy2_height = 10;
+var enemy2_width = 10;
+var enemy2_speed = .22;
+var enemy2_fire_rate = 60;
+
 //var enemy_speed = 2.3;

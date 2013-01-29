@@ -5,8 +5,8 @@ var explosion_diameter = 20;
 
 //Platform constructor. x is leftmost point.
 function Platform(x, y, width, horizontal, vertical) {
-	horizontal = 0;
-	vertical = 0;
+	//horizontal = 0;
+	//vertical = 0;
 	this.x = x;
 	this.y = y;
 	this.width = width;
@@ -42,6 +42,23 @@ function Enemy(x, y, width, i) {
 	this.si = 0;
 	this.sdelay = 0;
 	this.i = i
+}
+
+function Enemy2(x, y, width, i) {
+    this.x = x + 5 + Math.floor(Math.random()*(width - enemy_width - 5));
+    this.y = y - enemy2_height;
+    this.left = x;
+    this.right = x + width;
+    if (Math.random() > .5) {
+        this.vx = enemy_speed;
+    }
+    else {
+        this.vx = -enemy_speed;
+    }
+    this.vy = 0;
+    this.width = enemy2_width;
+    this.height = enemy2_height;
+    this.i = i;
 }
 
 function Explosion(x,y) {
