@@ -40,7 +40,7 @@ function Enemy_projectile(i) {
 	
 	this.img = new Image();
 	this.img.src = "explosion_1.png";
-	this.si = 0;
+	this.si = 2;
 	this.sx = [0,14,35,64];
 	this.sy = [16,10,2,1];
 	this.sWidth = [10,16,25,25];
