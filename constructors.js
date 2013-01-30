@@ -93,7 +93,7 @@ function Enemy2(x, y, width, i) {
     this.width = enemy2_width;
     this.height = enemy2_height;
     this.i = i;
-    this.lastFired = 30;
+    this.lastFired = Math.random()*80;
     console.log('x');
 }
 

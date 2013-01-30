@@ -1,63 +1,4 @@
 
-//this function is what sets everything in motion
-function init() {
-	canvas.addEventListener('keyup', onKeyUp, false);
-	canvas.addEventListener('keydown', onKeyDown, false);
-	canvas.addEventListener('mousedown', onMouseDown, false);
-	enemy_list = [];
-    enemy2_list = [];
-	projectile = [];
-    enemy_projectile = [];
-	explosion = [];
-	platform = [];
-	player_init(); //initializes player attributes
-	platform_init(); //creates platform objects. For now, is hardcoded, perhaps add randomization later
-	enemy_init();
-    enemy2_init();
-	lava.y = 500;
-	lava.vy = -.05;
-	lava.img = new Image();
-	lava.img.src = "lava.png";
-	lava.sx = [130, 100];
-	lava.sy = [690, 660];
-	lava.sWidth = [60, 20];
-	lava.sHeight = [10, 40];
-	lava.si = 0;
-	lava.sdelay = 0;
-	r_y = 0;
-	death_flag = false;
-	victory_flag = false;
-	canvas.setAttribute('tabindex','0');
-	canvas.focus();
-
-	intervalId = setInterval(update, timerDelay); //starts the timer
-}
-
-//initializes player attributes
-function player_init() {
-	player.vx = 0;
-	player.vy = 0;
-	player.x = 0;
-	player.y = 360;
-	player.width = 17; //slightly smaller than actual img to account for player not actually "colliding" with enemy
-	player.height = 40;
-	player.img = new Image();
-	player.img.src = "megaman_run.png";
-	player.ri = 0; //0-5 for right, 6-11 for left
-	player.rundelay = 0; //TODO: make this a function of velocity
-	player.runx = [0,150,360,480,360,150, 0,160,280,480,280,160];
-	player.runy = [0, 190];
-	player.runwidth = [150,190,120,160,120,190, 160,100,190,150,190,100];
-	player.runheight = [170, 170];
-	/*
-	player.sx = 0;
-	player.sy = 0;
-	player.sWidth = 50;
-	player.sHeight = 103;
-	*/
-	player.i = 0;
-	
-}
 
 //creates enemy objects, to be finished later
 function enemy_init() {
@@ -86,7 +27,7 @@ function enemy_fire() {
     
     while (i < enemy2_list.length) {
         enemy = enemy2_list[i];
-        if ((Math.abs(enemy.x - player.x) < canvas.width/2)
+        if ((Math.abs(enemy.x - player.x) < canvas.width)
             && (Math.abs(enemy.y - player.y) < canvas.height/2)) {
                 if (++enemy.lastFired > enemy2_fire_rate) {
                     enemy_projectile.push(new Enemy_projectile(i));
@@ -97,28 +38,6 @@ function enemy_fire() {
     }
 }
 
-function update_platforms() {
-	var i =0;
-	var plat;
-	while (i < platform.length) {
-		plat = platform[i];
-		plat.x += plat.vx;
-		plat.y += plat.vy;
-		if (plat.x <= plat.left) {
-			plat.vx = Math.abs(plat.vx);
-		}
-		if (plat.x >= plat.right) {
-			plat.vx = -Math.abs(plat.vx);
-		}
-		if (plat.y + r_y <= plat.up) {
-			plat.vy = Math.abs(plat.vy);
-		}
-		if (plat.y + r_y >= plat.down) {
-			plat.vy = -Math.abs(plat.vy);
-		}
-		i++;
-	}
-}
 
 function update_enemies(e_list) {
 	var i = 0;
@@ -153,15 +72,52 @@ function update_enemies(e_list) {
 	}
 }
 
-function player_enemy_collision_handler() {
-	var i = 0;
-	while (i < enemy_list.length) {
-		if (detect_collision(player, enemy_list[i])) {
-			death_flag = true;
-			break;
+function detect_projectile_collision_enemy() {
+    var i = 0;
+	var j;
+	var k;
+	var detected = false;
+	while (i < enemy_projectile.length) {
+		j = 0;
+		while (j < platform.length && (detected === false)) {
+			if (detect_collision(enemy_projectile[i], platform[j])) {
+				detected = true;
+				handle_projectile_platform_collision(i,j, enemy_projectile);
+			}
+			j++;
 		}
-		i++;
-	}
+        if ((detected === false) && ((enemy_projectile[i].x < 0) 
+            || (enemy_projectile[i].x + enemy_projectile[i].width > canvas.width)))
+            {
+            explosion.push(new Explosion(enemy_projectile[i].x, enemy_projectile[i].y));
+            enemy_projectile.splice(i,1);
+            detected = true;
+        }
+        if ((detected === false))
+        {
+            if (detect_collision(enemy_projectile[i], player)) {
+                explosion.push(new Explosion(enemy_projectile[i].x, enemy_projectile[i].y));
+                enemy_projectile.splice(i,1);
+                detected = true;
+                death_flag = true;
+            }
+        }
+        k = 0;
+        if ((detected === false) && (k < projectile.length)) {
+            if (detect_collision(enemy_projectile[i], projectile[k])) {
+                explosion.push(new Explosion(enemy_projectile[i].x, enemy_projectile[i].y));
+                enemy_projectile.splice(i,1);
+                projectile.splice(k,1);
+                detected = true;
+            }
+        }
+        
+    if (detected === false) {
+			i++;
+		}
+		detected = false;
+    }
+
 }
 
 function detect_projectile_collision(proj_list) {
@@ -171,6 +127,7 @@ function detect_projectile_collision(proj_list) {
 	var detected = false;
 	while (i < proj_list.length) {
 		j = 0;
+        //console.log(typeof(proj_list[i]));
 		while (j < platform.length && (detected === false)) {
 			if (detect_collision(proj_list[i], platform[j])) {
 				detected = true;
@@ -178,18 +135,26 @@ function detect_projectile_collision(proj_list) {
 			}
 			j++;
 		}
-        if (((proj_list[i].x < 0) 
-            || (proj_list[i].x + proj_list[i].width > canvas.width))
-            && (detected === false)){
+        if ((detected === false) && ((proj_list[i].x < 0) 
+            || (proj_list[i].x + proj_list[i].width > canvas.width)))
+            {
             explosion.push(new Explosion(proj_list[i].x, proj_list[i].y));
             proj_list.splice(i,1);
             detected = true;
         }
 		k = 0;
-		while (k < enemy_list.length && (detected === false)) {
+		while (detected === false && (k < enemy_list.length)) {
 			if (detect_collision(proj_list[i], enemy_list[k])) {
 				detected = true;
 				handle_projectile_enemy_collision(i,k, proj_list);
+			}
+			k++;
+		}
+        k = 0;
+		while (detected === false && (k < enemy2_list.length)) {
+			if (detect_collision(proj_list[i], enemy2_list[k])) {
+				detected = true;
+				handle_projectile_enemy2_collision(i,k, proj_list);
 			}
 			k++;
 		}
@@ -205,6 +170,13 @@ function handle_projectile_enemy_collision(i,k, proj_list) {
 	//currently this is identical, but we might want different behavior in the future
 	
 	enemy_list.splice(k,1);
+}
+
+function handle_projectile_enemy2_collision(i,k, proj_list) {
+	handle_projectile_platform_collision(i,k, proj_list); //placeholder code
+	//currently this is identical, but we might want different behavior in the future
+	
+	enemy2_list.splice(k,1);
 }
 
 function handle_projectile_platform_collision(i,j, proj_list) {
@@ -226,52 +198,6 @@ function handle_projectile_platform_collision(i,j, proj_list) {
 		projectile[i].vy = 0;
 	}
 }*/
-
-function player_platform_collision_handler() {
-	var i = 0;
-	while (i < platform.length) {
-			if (detect_collision(player, platform[i])) { //okay cool we hit a platform.
-				//now have to determine which direction we're hitting it from.
-				/*Note that you can't just undo the change in position
-				because that might leave a small gap between
-				the two objects instead of having them touch like you'd expect.*/
-				//colliding sets velocity to 0 and position accordingly.
-                
-				if (player.x - player.vx + platform[i].vx + player.width <= platform[i].x) {
-					player.x = platform[i].x - player.width;
-					player.vx = 0;
-                    if (platform[i].vx < 0 ) {
-                        player.x += platform[i].vx;
-                        player.vx = platform[i].vx;
-                    }
-				} else if (player.x - player.vx + platform[i].vx >= platform[i].x + platform[i].width) {
-						player.x = platform[i].x + platform[i].width;
-						player.vx = 0;
-                        if (platform[i].vx > 0) {
-                            player.x += platform[i].vx;
-                            player.vx = platform[i].vx;
-                        }
-				} else if (player.y - player.vy + player.height + platform[i].vy <= platform[i].y) {
-					player.y = platform[i].y - player.height;
-					player.vy = 0;
-					player.i = i;
-                    if (platform[i].vy < 0) {
-                        player.y += platform[i].vy;
-                        player.vy = platform[i].vy;
-                    }
-				} else  {
-					player.y = player.y - player.vy;//platform[i].y + platform[i].height;
-					player.vy = 0;
-                    if (platform[i].vy > 0) {
-                        player.y += platform[i].vy;
-                        player.vy = platform[i].vy;
-                    }
-				}
-			}
-			i++;
-		}
-}
-
 //for the player, checks to see if you're in the boundaries of the canvas
 function check_inbounds() {
 	if (player.x < 0) {
@@ -290,89 +216,6 @@ function check_inbounds() {
 		player.vy = 0;
 		player.y = canvas.height - player.height;
 	}
-}
-
-//detects collisions, returns boolean.
-/*General purpose so can be used for any two
-objects with x,y,width,height attributes.*/
-function detect_collision(obj1, obj2) {
-	if ((obj1.x + obj1.width > obj2.x) &&
-		(obj1.x < obj2.x + obj2.width) &&
-		(obj1.y + obj1.height > obj2.y) &&
-		(obj1.y < obj2.y + obj2.height)) {
-			return true;
-	}
-	return false;
-}
-
-
-//draws our board
-function draw() {
-	var i = 0;
-	ctx.clearRect(0,0,400,500);
-	ctx.fillStyle = "black";
-		//ctx.fillRect(player.x, player.y + r_y, 40,40);
-	while (i < platform.length) {
-		ctx.fillRect(platform[i].x, platform[i].y + r_y, platform[i].width, platform[i].height);
-		i++;
-	}
-	
-	//draw the player
-	ctx.drawImage(player.img, player.runx[player.ri], player.runy[Math.floor(player.ri/7)], 
-					player.runwidth[player.ri], 170, player.x, player.y + r_y, 24, 40);
-
-	ctx.fillStyle = "red";
-	ctx.fillRect(0, lava.y + r_y, canvas.width, canvas.height - lava.y);
-	if (lava.y < (canvas.height - lava.sHeight[0])) {
-		ctx.drawImage(lava.img, lava.sx[0], lava.sy[0], lava.sWidth[0], lava.sHeight[0], 20, lava.y + r_y, lava.sWidth[0], lava.sHeight[0]);
-	}
-	
-	ctx.drawImage(lava.img, lava.sx[1], lava.sy[1], lava.sWidth[1], lava.sHeight[1], 100, lava.y-lava.sHeight[1] + r_y, lava.sWidth[1], lava.sHeight[1]);
-	
-	//ctx.fillRect(player.x, player.y + (player.height/2) + r_y, 40, 2);
-	i = 0;
-	while (i < projectile.length) {
-		//ctx.fillRect(projectile[i].x, projectile[i].y, projectile_width, projectile_height);
-		ctx.fillRect(projectile[i].x, projectile[i].y + r_y, projectile[i].width, projectile[i].height);
-		i++;
-	}
-	i = 0;
-	while (i < explosion.length) {
-		//The following two lines are identical because width/height is always being assigned to
-		//explosion_diameter but for consistency i thought it would be nice s.t.
-		//all our objects have a width and height, and that we always reference it.
-		//Same for projectile
-	
-		//We subtract half of explosion diameter so that the explosion is centered rather than
-		//simply sharing the same corner as the projectile.
-		
-		//ctx.fillRect(explosion[i].x - explosion_diameter/2, explosion[i].y - explosion_diameter/2, explosion_diameter, explosion_diameter);
-		ctx.fillRect(explosion[i].x - explosion[i].width/2, explosion[i].y - explosion[i].height/2 + r_y, explosion[i].width, explosion[i].height);
-		explosion[i].time +=1;
-		if (explosion[i].time === explosion_timeout) {
-			explosion.splice(i,1);
-		}
-		else {
-			i++;
-		}
-	}
-	
-	//draw the enemies
-	ctx.fillStyle = "blue";
-	i = 0;
-	while (i < enemy_list.length) {
-		var si = enemy_list[i].si
-		ctx.drawImage(enemy_list[i].img, enemy_list[i].sx[si], 0, 
-					enemy_list[i].sWidth[si], 50, enemy_list[i].x, enemy_list[i].y + r_y, enemy_list[i].width, enemy_list[i].height);
-		//ctx.fillRect(enemy_list[i].x, enemy_list[i].y + r_y, enemy_list[i].width, enemy_list[i].height);
-		i++;
-	}
-    i = 0;
-    ctx.fillStyle = "purple";
-    while (i < enemy2_list.length) {
-        ctx.fillRect(enemy2_list[i].x, enemy2_list[i].y + r_y, enemy2_list[i].width, enemy2_list[i].height);
-        i++;
-    }
 }
 
 //this function is what sets everything in motion
@@ -477,9 +320,7 @@ function level_end_init() {
 
 //creates our platform objects, hardcoded as of now
 function platform_init() {
-	if(game_state <= 1) {
-		platform.push(new Platform(0, 400, 400, 0, 0));
-
+	platform.push(new Platform(0, 400, 400, 0, 0));
 		var plat_num = 0;
 		var plat_y = 400;
 		var plat_x = Math.floor(Math.random()*300);
@@ -499,12 +340,10 @@ function platform_init() {
 				plat_x = Math.floor(Math.random()*200) + Math.floor(Math.random()*100);
 			plat_num++;
 		}
-	}
 	if(game_state === 2) {
 		platform.push(new Platform(0, 400, 400, 0, 0));
 	}
 }
-
 
 //equivalent of onTimer. this is what we do every "tick".
 //Currently code is rather complicated and maybe should be
@@ -600,7 +439,7 @@ function update() {
 	update_projectiles(projectile);
 	update_projectiles(enemy_projectile);
 	detect_projectile_collision(projectile);
-	detect_projectile_collision(enemy_projectile);
+	detect_projectile_collision_enemy();
 	//redraw the board
 	if (lastFired <= fireRate) {
 		lastFired++;
@@ -615,16 +454,14 @@ function update() {
 	draw();
 	if(game_state === 0) {
 		clearInterval(intervalId);
-		ctx.fillStyle = "black";
-		ctx.fillRect(0,0,400,500);
+		title_img.src = "title.jpg";
+		ctx.drawImage(title_img,0,0,400,500);
 		ctx.strokeStyle = "white";
 		ctx.strokeRect(115,240,170,50);
 		ctx.strokeRect(115,300,170,50);
 		ctx.strokeRect(115,360,170,50);
 		ctx.fillStyle = "white";
-		ctx.font = "60px Arial";
 		ctx.textAlign = "center";
-		ctx.fillText("Project 1",200,150);
 		ctx.font = "40px Arial";
 		ctx.fillText("Start",200,280);
 		ctx.fillText("Controls",200,340);
@@ -653,6 +490,10 @@ function update() {
 		ctx.fillText("O V E R",200,270);
 		ctx.font = "30px Arial";
 		ctx.fillText("Press 'r' to restart",200,350);
+	}
+	if (game_state === 3) {
+		clearInterval(intervalId);
+		ctx.fillRect(0,0,400,500);
 	}
 }
 
@@ -739,6 +580,14 @@ function player_enemy_collision_handler() {
 		}
 		i++;
 	}
+    i = 0;
+    while (i < enemy2_list.length) {
+        if (detect_collision(player, enemy2_list[i])) {
+            death_flag = true;
+            break;
+        }
+        i++;
+    }
 }
 
 function update_projectiles(proj_list) {
@@ -808,27 +657,6 @@ function victory_collision_handler() {
 	if(detect_collision(player, level_end))
 		victory_flag = true;
 }
-
-//for the player, checks to see if you're in the boundaries of the canvas
-function check_inbounds() {
-	if (player.x < 0) {
-		player.vx = 0;
-		player.x = 0;
-	}
-	else if (player.x + player.width > canvas.width) {
-		player.vx = 0;
-		player.x = canvas.width - player.width;
-	}
-	/*if (player.y < 0) {
-		player.vy = 0;
-		player.y = 0;
-	}
-	else*/ if (player.y + player.height > canvas.height) {
-		player.vy = 0;
-		player.y = canvas.height - player.height;
-	}
-}
-
 
 //detects collisions, returns boolean.
 /*General purpose so can be used for any two

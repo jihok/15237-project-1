@@ -12,10 +12,28 @@ function onKeyDown(event) {
 			clearInterval(intervalId);
 			init();
 		}
+        
+        //below is for cheating purposes
 		else if (event.keyCode === 73) {
 			alert("toggled invincibility");
 			invinc_flag = !invinc_flag;
 		}
+        else if (event.keyCode === 37) {
+            player.x -= 5;
+        }
+        else if (event.keyCode === 38) {
+            player.y -= 5;
+        }
+        else if (event.keyCode === 39) {
+            player.x += 5;
+        }
+        else if (event.keyCode === 40) {
+            player.y += 5;
+        }
+        else if (event.keyCode === 71) {
+            gravity = 0;
+            alert('no gravity');
+        }
 		//makes the player jump. The velocity check makes it
 		//so you cannot jump in mid air, only while resting.
 		
@@ -45,6 +63,11 @@ function onKeyDown(event) {
 		clearInterval(intervalId);
 		init();
 	}
+	else if (event.keyCode === 51) {
+		game_state = 3;
+		clearInterval(intervalId);
+		init();
+	}
 }
 
 function onKeyUp(event) {
@@ -59,16 +82,21 @@ function onKeyUp(event) {
 function onMouseDown(event) {
 	if(game_state === 0) {
 		if(event.pageX >= 125 && event.pageX <= 295) {
+			//start
 			if(event.pageY >= 250 && event.pageY <= 300) {
 				clearInterval(intervalId);
 				game_state = 1;
 				init();
 			}
+
+			//controls
 			if(event.pageY >= 310 && event.pageY <= 360) {
 				clearInterval(intervalId);
 				game_state = 1;
 				init();
 			}
+
+			//credits
 			if(event.pageY >= 370 && event.pageY <= 420) {
 				clearInterval(intervalId);
 				game_state = 1;
