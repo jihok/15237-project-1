@@ -12,10 +12,28 @@ function onKeyDown(event) {
 			clearInterval(intervalId);
 			init();
 		}
+        
+        //below is for cheating purposes
 		else if (event.keyCode === 73) {
 			alert("toggled invincibility");
 			invinc_flag = !invinc_flag;
 		}
+        else if (event.keyCode === 37) {
+            player.x -= 5;
+        }
+        else if (event.keyCode === 38) {
+            player.y -= 5;
+        }
+        else if (event.keyCode === 39) {
+            player.x += 5;
+        }
+        else if (event.keyCode === 40) {
+            player.y += 5;
+        }
+        else if (event.keyCode === 71) {
+            gravity = 0;
+            alert('no gravity');
+        }
 		//makes the player jump. The velocity check makes it
 		//so you cannot jump in mid air, only while resting.
 		
@@ -29,13 +47,9 @@ function onKeyDown(event) {
 		//any fall or jump.
 		else if (event.keyCode === 87 && (player.vy === 0 || player.vy === 0.05)) {
 			player.vy -= 3;
+            player.vx += platform[player.i].vx/5;
 		}
 	}
-
-	//now that i think about it there'd be a better way to do this by
-	//changing the speed directly in update and having this simply
-	//set a boolean
-	//but fuck it this works very well for now
 
 	if(event.keyCode === 49) {
 		game_state = 1;
