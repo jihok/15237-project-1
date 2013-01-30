@@ -47,6 +47,10 @@ var death_flag = false;
 var victory_flag = false;
 var invinc_flag = false;
 
+var story_flag = false;
+var control_flag = false;
+var credit_flag = false;
+
 var cannon = new Object();
 var x_diff = 0;
 var y_diff = 0;
@@ -67,4 +71,4 @@ var enemy2_width = 10;
 var enemy2_speed = .22;
 var enemy2_fire_rate = 150;
 
-var enemy_projectile_speed = 2;     
+var enemy_projectile_speed = 2;

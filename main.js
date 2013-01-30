@@ -455,7 +455,9 @@ function update() {
 	if(game_state === 0) {
 		clearInterval(intervalId);
 		title_img.src = "title.jpg";
-		ctx.drawImage(title_img,0,0,400,500);
+		ctx.fillStyle = "black";
+		ctx.fillRect(0,0,400,500);
+		ctx.drawImage(title_img,0,0,400,200);
 		ctx.strokeStyle = "white";
 		ctx.strokeRect(115,240,170,50);
 		ctx.strokeRect(115,300,170,50);
