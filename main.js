@@ -568,16 +568,16 @@ function player_init() {
 function cannon_init() {
 	cannon.x = player.x+player.width-10; //subtract a little so the hand is actually holding it
 	cannon.y = player.y + r_y+(player.height/2);
-	cannon.width = 20;
-	cannon.height = 10;
+	cannon.width = 50;
+	cannon.height = 20;
 	cannon.angle = Math.atan2(y_diff,x_diff);
 	cannon.img = new Image();
 	cannon.img.src = "gun.png";
-	cannon.sx = [0,33];
+	cannon.sx = [0,120];
 	cannon.sy = [0,0];
-	cannon.sWidth = [30,35];
-	cannon.sHeight = [20,20];
-	cannon.i = 0;
+	cannon.sWidth = [241,241];
+	cannon.sHeight = [42,42];
+	cannon.si = 0;
     cannon.hoz_adj = 10;
 }
 
