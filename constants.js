@@ -71,6 +71,6 @@ var enemy_speed = 0.3;
 var enemy2_height = 40;
 var enemy2_width = 30;
 var enemy2_speed = .22;
-var enemy2_fire_rate = 60;
+var enemy2_fire_rate = 120;
 
 var enemy_projectile_speed = 2;

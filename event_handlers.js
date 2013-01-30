@@ -31,8 +31,14 @@ function onKeyDown(event) {
             player.y += 5;
         }
         else if (event.keyCode === 71) {
+            if (gravity >= 0) {
             gravity = 0;
             alert('no gravity');
+            }
+            else {
+                gravity = .05;
+                alert('gravity enabled');
+            }
         }
 		//makes the player jump. The velocity check makes it
 		//so you cannot jump in mid air, only while resting.
