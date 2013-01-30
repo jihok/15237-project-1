@@ -47,6 +47,10 @@ var death_flag = false;
 var victory_flag = false;
 var invinc_flag = false;
 
+var story_flag = false;
+var control_flag = false;
+var credit_flag = false;
+
 var cannon = new Object();
 var x_diff = 0;
 var y_diff = 0;

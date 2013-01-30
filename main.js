@@ -598,7 +598,7 @@ function platform_init() {
 	var plat_y = 400;
 	var plat_x = Math.floor(Math.random()*300);
 	while (plat_num < 10) {
-		var next_plat_y = Math.floor(Math.random()*30) + 40;
+		var next_plat_y = Math.floor(Math.random()*30) + 45;
 		plat_y -= next_plat_y;
         horiz = Math.min(canvas.width - (plat_x + 200), Math.min(plat_x, Math.random() * 300));
         if (horiz < 5) {

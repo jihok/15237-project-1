@@ -66,28 +66,48 @@ function onKeyUp(event) {
 }
 
 function onMouseDown(event) {
-	if(game_state === 0) {
-		if(event.pageX >= 125 && event.pageX <= 295) {
-			//start
-			if(event.pageY >= 250 && event.pageY <= 300) {
-				clearInterval(intervalId);
-				game_state = 1;
-				init();
-			}
+	if (game_state === 0) {
+		if (story_flag === false && control_flag === false && credit_flag === false) {
+			if(event.pageX >= 125 && event.pageX <= 295) {
+				//start
+				if(event.pageY >= 250 && event.pageY <= 300) {
+					clearInterval(intervalId);
+					story_flag = true;
+					ctx.fillStyle = "black";
+					ctx.fillRect(0,0,400,500);
+				}
 
-			//controls
-			if(event.pageY >= 310 && event.pageY <= 360) {
-				clearInterval(intervalId);
-				game_state = 1;
-				init();
-			}
+				//controls
+				if(event.pageY >= 310 && event.pageY <= 360) {
+					clearInterval(intervalId);
+					control_flag = true;
+					ctx.fillStyle = "black";
+					ctx.fillRect(0,0,400,500);
+				}
 
-			//credits
-			if(event.pageY >= 370 && event.pageY <= 420) {
-				clearInterval(intervalId);
-				game_state = 1;
-				init();
+				//credits
+				if(event.pageY >= 370 && event.pageY <= 420) {
+					clearInterval(intervalId);
+					credit_flag = true;
+					ctx.fillStyle = "black";
+					ctx.fillRect(0,0,400,500);
+				}
 			}
+		}
+		else if (story_flag === true) {
+			clearInterval(intervalId);
+			game_state = 1;
+			init();
+		}
+		else if (control_flag === true) {
+			clearInterval(intervalId);
+			control_flag = false;
+			init();
+		}
+		else if (credit_flag === true) {
+			clearInterval(intervalId);
+			credit_flag = false;
+			init();
 		}
 	}
 	else {
