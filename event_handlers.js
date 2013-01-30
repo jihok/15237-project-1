@@ -111,6 +111,10 @@ function onMouseDown(event) {
 					ctx.fillText("1 = advance to level 1",15,340);
 					ctx.fillText("2 = advance to level 2",15,360);
 					ctx.fillText("3 = beat the game",15,380);
+					ctx.fillText("g = zero gravity",15,400);
+					ctx.fillStyle = "white";
+					ctx.textAlign = "center";
+					ctx.fillText("(Click anywhere to start the game)",200,450);
 				}
 
 				//controls
