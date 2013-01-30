@@ -94,6 +94,23 @@ function onMouseDown(event) {
 					story_flag = true;
 					ctx.fillStyle = "black";
 					ctx.fillRect(0,0,400,500);
+					ctx.fillStyle = "white";
+					ctx.font = "30px Arial";
+					ctx.textAlign = "left";
+					ctx.fillText("Somehow our favorite hero,",15,50);
+					ctx.fillText("Megaman, finds himself",15,80);
+					ctx.fillText("in another world. With a",15,110);
+					ctx.fillText("broken arm and a new gun,",15,140);
+					ctx.fillText("all he can hope is that at",15,170);
+					ctx.fillText("the end of this journey,",15,200);
+					ctx.fillText("he'll find a way home...",15,230);
+					ctx.fillStyle = "grey";
+					ctx.fillText("Cheat codes:",15,300);
+					ctx.font = "20px Arial";
+					ctx.fillText("i = invincibility to enemy collisions",15,320);
+					ctx.fillText("1 = advance to level 1",15,340);
+					ctx.fillText("2 = advance to level 2",15,360);
+					ctx.fillText("3 = beat the game",15,380);
 				}
 
 				//controls
