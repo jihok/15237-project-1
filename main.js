@@ -791,8 +791,10 @@ function draw() {
     ctx.fillStyle = 'red';
     while (i < enemy_projectile.length) {
         //ctx.fillRect(enemy_projectile[i].x, enemy_projectile[i].y + r_y, enemy_projectile.width, enemy_projectile.height);
-        ctx.fillRect(enemy_projectile[i].x, enemy_projectile[i].y + r_y, enemy_projectile[i].width, enemy_projectile[i].height);
+        //ctx.fillRect(enemy_projectile[i].x, enemy_projectile[i].y + r_y, enemy_projectile[i].width, enemy_projectile[i].height);
         //alert(enemy_projectile[i].x + " " + enemy_projectile[i].y);
+		var ei = enemy_projectile[i].si;
+		ctx.drawImage(enemy_projectile[i].img, enemy_projectile[i].sx[ei], enemy_projectile[i].sy[ei], enemy_projectile[i].sWidth[ei], enemy_projectile[i].sHeight[ei],enemy_projectile[i].x, enemy_projectile[i].y + r_y, enemy_projectile[i].width, enemy_projectile[i].height);
         i++;
     }
 }

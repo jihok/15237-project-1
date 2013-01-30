@@ -60,3 +60,4 @@ background img: http://www.michaelspornanimation.com/splog/?p=3080
 player img: http://cobalt-blue-knight.deviantart.com/art/Megaman-Running-Sprites-178109596
 explosion img: http://www.sprites-inc.co.uk/files/ZX/Zx1/Enemy/
 enemy img: http://www.nes-snes-sprites.com/DonkeyKongCountry2DiddysKongQuestEnemies.html
+door: http://epsdraub.wikispaces.com/file/view/game-door.gif/76886617/game-door.gif
