@@ -92,7 +92,7 @@ function detect_projectile_collision_enemy() {
             enemy_projectile.splice(i,1);
             detected = true;
         }
-        if ((detected === false))
+        if ((detected === false) && (!invinc_flag))
         {
             if (detect_collision(enemy_projectile[i], player)) {
                 explosion.push(new Explosion(enemy_projectile[i].x, enemy_projectile[i].y));
@@ -365,7 +365,6 @@ function update() {
 		}
 		
 		player.vx -= 0.08;
-		//player.vx = Math.max(player.vx - .06, -1 * max_speed);
 	}
 	//moving right only (player.ri: 0-5)
     if (key_pressed_right && player.vy === 0) {
@@ -381,7 +380,6 @@ function update() {
 		}
 		
 		player.vx += 0.08;
-		//player.vx = Math.min(player.vx + .06, max_speed);
     }
 	
 	if (player.vy < 0 && key_pressed_left) {
@@ -505,7 +503,7 @@ function update_cannon() {
 	if (key_pressed_right) {
 		cannon.si = 0; //right gun sprite
         cannon.hoz_adj = 4.5;
-		//cannon.x = player.x+player.width-10; //subtract a little so player hand is "holding" gun
+        //subtract a little so player hand is "holding" gun
 	}
 	else if (key_pressed_left) {
 		cannon.si = 1; //left gun sprite
@@ -538,42 +536,6 @@ function update_platforms() {
 		i++;
 	}
 }
-/*
-function update_enemies() {
-	var i = 0;
-	var plat;
-	var enemy;
-	while (i < enemy_list.length) {
-		enemy = enemy_list[i];
-		plat = platform[enemy.i];
-		//going left, turn right
-		if (enemy.x <= plat.x + 5) {
-			enemy.vx = Math.abs(enemy.vx);
-			enemy.si = enemy.sright+1;
-		}
-		//going right, turn left
-		else if (enemy.x + enemy.width >= plat.x + plat.width - 5) {
-			enemy.vx = -Math.abs(enemy.vx);
-			enemy.si = 0;
-		}
-		
-		enemy.x += enemy.vx + plat.vx;
-		enemy.y = plat.y - enemy.height;
-		if (enemy.sdelay !== enemy.smax)
-			enemy.sdelay++;
-		else {
-			enemy.sdelay = 0;
-			enemy.si++;
-			//moving right and last right sprite so reset to first right sprite
-			if (enemy.si > (enemy.sleft) && enemy.vx > 0)
-				enemy.si = (enemy.sright+1);
-			//moving left and last left sprite so reset to first left sprite
-			else if (enemy.si > (enemy.sright) && enemy.vx < 0)
-				enemy.si = 0;
-		}
-	i++;
-	}
-}*/
 
 function player_enemy_collision_handler() {
 	var i = 0;
@@ -604,8 +566,6 @@ function update_projectiles(proj_list) {
 		}
 		proj_list[i].x += proj_list[i].vx;
 		proj_list[i].y += proj_list[i].vy;
-        //console.log(proj_list[i].x, proj_list[i].y);
-        ctx.fill
 		proj_list[i].time += 1;
 		i++;
 	}
@@ -642,9 +602,8 @@ function player_platform_collision_handler() {
                         player.y += platform[i].vy;
                         player.vy = platform[i].vy;
                     }
-                    //player.vx += platform[i].vx;
 				} else if (player.y - player.vy + platform[i].vy >= platform[i].y + platform[i].height) {
-					player.y = player.y - player.vy;//platform[i].y + platform[i].height;
+					player.y = player.y - player.vy;
 					player.vy = 0;
                     if (platform[i].vy > 0) {
                         player.y += platform[i].vy;
@@ -731,7 +690,6 @@ function draw() {
 	ctx.drawImage(cannon.img, cannon.sx[cannon.si], cannon.sy[cannon.si], 
 				cannon.sWidth[cannon.si], cannon.sHeight[cannon.si], 
 				player.x + cannon.hoz_adj, cannon.y + r_y, cannon.width, cannon.height);
-	//ctx.fillRect(cannon.x, cannon.y + r_y, cannon.width, cannon.height);
 	ctx.restore();
 	
 	
@@ -741,7 +699,6 @@ function draw() {
 	//draw projectiles and explosions
 	i = 0;
 	while (i < projectile.length) {
-		//ctx.fillRect(projectile[i].x, projectile[i].y, projectile_width, projectile_height);
 		var ei = projectile[i].si;
 		ctx.drawImage(projectile[i].img, projectile[i].sx[ei], projectile[i].sy[ei], projectile[i].sWidth[ei], projectile[i].sHeight[ei], projectile[i].x, projectile[i].y + r_y, projectile[i].width, projectile[i].height);
 		i++;
@@ -756,10 +713,8 @@ function draw() {
 		//We subtract half of explosion diameter so that the explosion is centered rather than
 		//simply sharing the same corner as the projectile.
 		
-		//ctx.fillRect(explosion[i].x - explosion_diameter/2, explosion[i].y - explosion_diameter/2, explosion_diameter, explosion_diameter);
 		var ei = explosion[i].si;
 		ctx.drawImage(explosion[i].img, explosion[i].sx[ei], explosion[i].sy[ei], explosion[i].sWidth[ei], explosion[i].sHeight[ei], explosion[i].x - explosion[i].width/2, explosion[i].y - explosion[i].height/2 + r_y, explosion[i].width, explosion[i].height);
-		//ctx.fillRect(explosion[i].x - explosion[i].width/2, explosion[i].y - explosion[i].height/2 + r_y, explosion[i].width, explosion[i].height);
 		explosion[i].time +=1;
 		if (explosion[i].time === explosion_timeout) {
 			explosion.splice(i,1);
@@ -775,7 +730,6 @@ function draw() {
 		var si = enemy_list[i].si
 		ctx.drawImage(enemy_list[i].img, enemy_list[i].sx[si], 0, 
 					enemy_list[i].sWidth[si], 50, enemy_list[i].x, enemy_list[i].y + r_y, enemy_list[i].width, enemy_list[i].height);
-		//ctx.fillRect(enemy_list[i].x, enemy_list[i].y + r_y, enemy_list[i].width, enemy_list[i].height);
 		i++;
 	}
     i = 0;
@@ -784,15 +738,11 @@ function draw() {
 		var si = enemy_list[i].si
 		ctx.drawImage(enemy2_list[i].img, enemy2_list[i].sx[si], 0, 
 					enemy2_list[i].sWidth[si], 50, enemy2_list[i].x, enemy2_list[i].y + r_y, enemy2_list[i].width, enemy2_list[i].height);
-        //ctx.fillRect(enemy2_list[i].x, enemy2_list[i].y + r_y, enemy2_list[i].width, enemy2_list[i].height);
         i++;
     }
     i = 0;
     ctx.fillStyle = 'red';
     while (i < enemy_projectile.length) {
-        //ctx.fillRect(enemy_projectile[i].x, enemy_projectile[i].y + r_y, enemy_projectile.width, enemy_projectile.height);
-        //ctx.fillRect(enemy_projectile[i].x, enemy_projectile[i].y + r_y, enemy_projectile[i].width, enemy_projectile[i].height);
-        //alert(enemy_projectile[i].x + " " + enemy_projectile[i].y);
 		var ei = enemy_projectile[i].si;
 		ctx.drawImage(enemy_projectile[i].img, enemy_projectile[i].sx[ei], enemy_projectile[i].sy[ei], enemy_projectile[i].sWidth[ei], enemy_projectile[i].sHeight[ei],enemy_projectile[i].x, enemy_projectile[i].y + r_y, enemy_projectile[i].width, enemy_projectile[i].height);
         i++;

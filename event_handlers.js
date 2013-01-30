@@ -56,12 +56,6 @@ function onKeyDown(event) {
             player.vx += platform[player.i].vx/5;
 		}
 	}
-
-	//now that i think about it there'd be a better way to do this by
-	//changing the speed directly in update and having this simply
-	//set a boolean
-	//but fuck it this works very well for now
-
 	if(event.keyCode === 49) {
 		game_state = 1;
 		alert("Level 1");
@@ -153,7 +147,7 @@ function onMouseDown(event) {
 					ctx.font = "40px Arial";
 					ctx.fillText("Norbert Chu, nchu",200,200);
 					ctx.fillText("Jiho Kim, jihok",200,250);
-					ctx.fillText("Deanna Zhu, dzw",200,300);
+					ctx.fillText("Deanna Zhu, dwz",200,300);
 					ctx.font = "20px Arial";
 					ctx.fillText("(Click anywhere to return to the title screen)",200,450);
 				}
