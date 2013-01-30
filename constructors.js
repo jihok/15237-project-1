@@ -30,8 +30,8 @@ function Enemy_projectile(i) {
 	var center_x = enemy.x + (enemy.width/2) - (projectile_width/2);
 	var center_y = enemy.y + (enemy.height/2) - (projectile_height/2);
 	var hypotenuse = Math.sqrt( Math.pow(player.x - center_x,2) + Math.pow(player.y - center_y,2));
-	this.vx = projectile_speed * ((player.x - center_x)/hypotenuse);
-	this.vy = projectile_speed * ((player.y - center_y)/hypotenuse);
+	this.vx = enemy_projectile_speed * ((player.x - center_x)/hypotenuse);
+	this.vy = enemy_projectile_speed * ((player.y - center_y)/hypotenuse);
 	this.x = center_x - (projectile_width/2);
 	this.y = center_y - (projectile_height/2);
 	this.time = 0;
@@ -79,15 +79,15 @@ function Enemy(x, y, width, i) {
 }
 
 function Enemy2(x, y, width, i) {
-    this.x = x + 5 + Math.floor(Math.random()*(width - enemy_width - 5));
+    this.x = x + 5 + Math.floor(Math.random()*(width - enemy2_width - 5));
     this.y = y - enemy2_height;
     this.left = x;
     this.right = x + width;
     if (Math.random() > .5) {
-        this.vx = enemy_speed;
+        this.vx = enemy2_speed;
     }
     else {
-        this.vx = -enemy_speed;
+        this.vx = -enemy2_speed;
     }
     this.vy = 0;
     this.width = enemy2_width;

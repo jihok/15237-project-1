@@ -29,13 +29,9 @@ function onKeyDown(event) {
 		//any fall or jump.
 		else if (event.keyCode === 87 && (player.vy === 0 || player.vy === 0.05)) {
 			player.vy -= 3;
+            player.vx += platform[player.i].vx/5;
 		}
 	}
-
-	//now that i think about it there'd be a better way to do this by
-	//changing the speed directly in update and having this simply
-	//set a boolean
-	//but fuck it this works very well for now
 
 	if(event.keyCode === 49) {
 		game_state = 1;

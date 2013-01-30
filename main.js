@@ -81,117 +81,19 @@ function enemy2_init() {
     }
 }
 
-//equivalent of onTimer. this is what we do every "tick".
-//Currently code is rather complicated and maybe should be
-//separated into helper functions.
-function update() {
-	var i = 0; //just a variable for traversing indices
-	
-	//movement is done indirectly by giving a player acceleration.
-	//note you can only accelerate
-    if (key_pressed_left && player.vy === 0) {
-		if (player.ri < 6)
-			player.ri = 6;
-		if (player.rundelay !== 3)
-			player.rundelay++;
-		else {
-			player.rundelay = 0;
-			player.ri++;
-			if (player.ri === 12)
-				player.ri = 7;
-		}
-		
-		player.vx -= 0.06;
-		//player.vx = Math.max(player.vx - .06, -1 * max_speed);
-	}
-    if (key_pressed_right && player.vy === 0) {
-		if (player.ri > 5)
-			player.ri = 0;
-		if (player.rundelay !== 3)
-			player.rundelay++;
-		else {
-			player.rundelay = 0;
-			player.ri++;
-			if (player.ri === 6)
-				player.ri = 0;
-		}
-		
-		player.vx += 0.06;
-		//player.vx = Math.min(player.vx + .06, max_speed);
-    }
-	player.x += player.vx + platform[player.i].vx;
-	player.y += player.vy ;//+ platform[player.i].vy;
-	update_platforms();
-	//gives constant accleration downwards
-	player.vy += gravity;
-	//player.vy = Math.min(player.vy + gravity, free_fall_speed);
-	
-	//make sure player is inside the canvas
-	check_inbounds();
-	
-	//check collisions with platforms
-	player_platform_collision_handler();
-	
-	if (!invinc_flag) {
-		player_enemy_collision_handler();
-	}
-	
-	//friction
-	if (player.vy === 0) {
-		player.vx -= (player.vx * 0.04);
-	}
-	lava.y += lava.vy;
-	if (lava.y <= player.y + player.height) {
-		death_flag = true;
-	}
-	update_projectiles();
-	detect_projectile_collision();
-	//redraw the board
-	if (lastFired <= fireRate) {
-		lastFired++;
-	}
-	
-	if (player.y + r_y < threshold_up) {
-		r_y++;
-	}
-	else if (player.y + r_y > threshold_down) {
-		r_y--;
-	}
-	update_enemies(enemy_list);
-    update_enemies(enemy2_list);
-    enemy_fire();
-	draw();
-	if(game_start === false) {
-		clearInterval(intervalId);
-		ctx.fillRect(0,0,400,500);
-	}
-	if (victory_flag) {
-		clearInterval(intervalId);
-		ctx.fillRect(0,0,400,500);
-		ctx.font = "60px Arial";
-		ctx.textAlign = "center";
-		ctx.fillText("GAME OVER",200,200);
-	}
-	if (death_flag) {
-		clearInterval(intervalId);
-		ctx.fillRect(0,0,400,500);
-		ctx.font = "60px Arial";
-		ctx.textAlign = "center";
-		ctx.fillText("GAME OVER",200,200);
-	}
-}
-
 function enemy_fire() {
     var i =0;
-    while (i < enemy2_list) {
+    
+    while (i < enemy2_list.length) {
         enemy = enemy2_list[i];
         if ((Math.abs(enemy.x - player.x) < canvas.width/2)
             && (Math.abs(enemy.y - player.y) < canvas.height/2)) {
-                if (enemy.lastFired > fireRate) {
+                if (++enemy.lastFired > enemy2_fire_rate) {
                     enemy_projectile.push(new Enemy_projectile(i));
+                    enemy.lastFired = 0;
                 }
             }
-            i++;
+        i++;
     }
 }
 
@@ -262,49 +164,32 @@ function player_enemy_collision_handler() {
 	}
 }
 
-function update_projectiles() {
-	var i = 0;
-	while (i < projectile.length) {
-	
-		//PERHAPS NOT NEEDED
-		if (projectile[i].time === 200) {
-			projectile.shift();
-			continue;
-		}
-		projectile[i].x += projectile[i].vx;
-		projectile[i].y += projectile[i].vy;
-		projectile[i].time += 1;
-		i++;
-	}
-}
-
-function detect_projectile_collision() {
+function detect_projectile_collision(proj_list) {
 	var i = 0;
 	var j;
 	var k;
 	var detected = false;
-	while (i < projectile.length) {
+	while (i < proj_list.length) {
 		j = 0;
 		while (j < platform.length && (detected === false)) {
-			if (detect_collision(projectile[i], platform[j])) {
-				//projectile.splice(i, 1);
+			if (detect_collision(proj_list[i], platform[j])) {
 				detected = true;
-				handle_projectile_platform_collision(i,j);
+				handle_projectile_platform_collision(i,j, proj_list);
 			}
 			j++;
 		}
-        if (((projectile[i].x < 0) 
-            || (projectile[i].x + projectile[i].width > canvas.width))
+        if (((proj_list[i].x < 0) 
+            || (proj_list[i].x + proj_list[i].width > canvas.width))
             && (detected === false)){
-            explosion.push(new Explosion(projectile[i].x, projectile[i].y));
-            projectile.splice(i,1);
+            explosion.push(new Explosion(proj_list[i].x, proj_list[i].y));
+            proj_list.splice(i,1);
             detected = true;
         }
 		k = 0;
 		while (k < enemy_list.length && (detected === false)) {
-			if (detect_collision(projectile[i], enemy_list[k])) {
+			if (detect_collision(proj_list[i], enemy_list[k])) {
 				detected = true;
-				handle_projectile_enemy_collision(i,k);
+				handle_projectile_enemy_collision(i,k, proj_list);
 			}
 			k++;
 		}
@@ -315,16 +200,16 @@ function detect_projectile_collision() {
 	}
 }
 
-function handle_projectile_enemy_collision(i,k) {
-	handle_projectile_platform_collision(i,k); //placeholder code
+function handle_projectile_enemy_collision(i,k, proj_list) {
+	handle_projectile_platform_collision(i,k, proj_list); //placeholder code
 	//currently this is identical, but we might want different behavior in the future
 	
 	enemy_list.splice(k,1);
 }
 
-function handle_projectile_platform_collision(i,j) {
-	explosion.push(new Explosion(projectile[i].x, projectile[i].y));
-	projectile.splice(i,1);
+function handle_projectile_platform_collision(i,j, proj_list) {
+	explosion.push(new Explosion(proj_list[i].x, proj_list[i].y));
+	proj_list.splice(i,1);
 }
 	/*
 	if (projectile[i].x - projectile[i].vx + projectile_width <= platform[j].x) {
@@ -578,7 +463,7 @@ function cannon_init() {
 	cannon.sWidth = [30,35];
 	cannon.sHeight = [20,20];
 	cannon.i = 0;
-    cannon.hoz_adj = 10;
+    cannon.hoz_adj = 4.5;
 }
 
 function level_end_init() {
@@ -599,7 +484,7 @@ function platform_init() {
 		var plat_y = 400;
 		var plat_x = Math.floor(Math.random()*300);
 		while (plat_num < 10) {
-			var next_plat_y = Math.floor(Math.random()*30) + 40;
+			var next_plat_y = Math.floor(Math.random()*35) + 50;
 			plat_y -= next_plat_y;
             horiz = Math.min(canvas.width - (plat_x + 200), Math.min(plat_x, Math.random() * 300));
             if (horiz < 5) {
@@ -642,7 +527,7 @@ function update() {
 				player.ri = (player.rright+1);
 		}
 		
-		player.vx -= 0.06;
+		player.vx -= 0.08;
 		//player.vx = Math.max(player.vx - .06, -1 * max_speed);
 	}
 	//moving right only (player.ri: 0-5)
@@ -658,7 +543,7 @@ function update() {
 				player.ri = 0;
 		}
 		
-		player.vx += 0.06;
+		player.vx += 0.08;
 		//player.vx = Math.min(player.vx + .06, max_speed);
     }
 	
@@ -695,7 +580,7 @@ function update() {
 
 	//friction
 	if (player.vy === 0) {
-		player.vx -= (player.vx * 0.04);
+		player.vx -= (player.vx * 0.045);
 	}
 	lava.y += lava.vy;
 	if (lava.y <= player.y + player.height) {
@@ -708,8 +593,14 @@ function update() {
 		}
 		temp++;
 	}
-	update_projectiles();
-	detect_projectile_collision();
+	update_enemies(enemy_list);
+    update_enemies(enemy2_list);
+    enemy_fire();
+	update_cannon();
+	update_projectiles(projectile);
+	update_projectiles(enemy_projectile);
+	detect_projectile_collision(projectile);
+	detect_projectile_collision(enemy_projectile);
 	//redraw the board
 	if (lastFired <= fireRate) {
 		lastFired++;
@@ -719,10 +610,8 @@ function update() {
 		r_y++;
 	}
 	else if (player.y + r_y > threshold_down) {
-		r_y--;
+		r_y -= 3;
 	}
-	update_enemies();
-	update_cannon();
 	draw();
 	if(game_state === 0) {
 		clearInterval(intervalId);
@@ -804,7 +693,7 @@ function update_platforms() {
 		i++;
 	}
 }
-
+/*
 function update_enemies() {
 	var i = 0;
 	var plat;
@@ -839,7 +728,7 @@ function update_enemies() {
 		}
 	i++;
 	}
-}
+}*/
 
 function player_enemy_collision_handler() {
 	var i = 0;
@@ -852,86 +741,22 @@ function player_enemy_collision_handler() {
 	}
 }
 
-function update_projectiles() {
+function update_projectiles(proj_list) {
 	var i = 0;
-	while (i < projectile.length) {
+	while (i < proj_list.length) {
 		//PERHAPS NOT NEEDED
-		if (projectile[i].time === 200) {
-			projectile.shift();
+		if (proj_list[i].time === 200) {
+			proj_list.shift();
 			continue;
 		}
-		projectile[i].x += projectile[i].vx;
-		projectile[i].y += projectile[i].vy;
-		projectile[i].time += 1;
+		proj_list[i].x += proj_list[i].vx;
+		proj_list[i].y += proj_list[i].vy;
+        //console.log(proj_list[i].x, proj_list[i].y);
+        ctx.fill
+		proj_list[i].time += 1;
 		i++;
 	}
 }
-
-function detect_projectile_collision() {
-	var i = 0;
-	var j;
-	var k;
-	var detected = false;
-	while (i < projectile.length) {
-		j = 0;
-		while (detected === false && (j < platform.length)) {
-			if (detect_collision(projectile[i], platform[j])) {
-				//projectile.splice(i, 1);
-				detected = true;
-				handle_projectile_platform_collision(i,j);
-			}
-			j++;
-		}
-        	
-        if ((detected === false) && ((projectile[i].x < 0) 
-            || (projectile[i].x + projectile[i].width > canvas.width))) {
-            explosion.push(new Explosion(projectile[i].x, projectile[i].y));
-            detected = true;
-            projectile.splice(i,1);
-        }
-        
-		k = 0;
-		while ((detected === false) && (k < enemy_list.length)) {
-			if (detect_collision(projectile[i], enemy_list[k])) {
-				detected = true;
-				handle_projectile_enemy_collision(i,k);
-			}
-			k++;
-		}
-		if (detected === false) {
-			i++;
-		}
-		detected = false;
-	}
-}
-
-function handle_projectile_enemy_collision(i,k) {
-	handle_projectile_platform_collision(i,k); //placeholder code
-	//currently this is identical, but we might want different behavior in the future
-	
-	enemy_list.splice(k,1);
-}
-
-function handle_projectile_platform_collision(i,j) {
-	explosion.push(new Explosion(projectile[i].x, projectile[i].y));
-	projectile.splice(i,1);
-}
-	/*
-	if (projectile[i].x - projectile[i].vx + projectile_width <= platform[j].x) {
-		explosion.push(new Explosion(platform[j].x - projectile_width,
-		projectile[i].vx = 0;
-	} else if (projectile[i].x - projectile[i].vx >= platform[j].x + platform[j].width) {
-			projectile[i].x = platform[j].x + platform_width;
-			projectile[i].vx = 0;
-	} else if (projectile[i].y - projectile[i].vy + projectile_height <= platform[j].y) {
-		projectile[i].y = platform[j].y - projectile_height;
-		projectile[i].vy = 0;
-	} else  {
-		projectile[i].y = platform[j].y + platform[j].height;
-		projectile[i].vy = 0;
-	}
-}*/
-
 function player_platform_collision_handler() {
 	var i = 0;
 	while (i < platform.length) {
@@ -956,7 +781,7 @@ function player_platform_collision_handler() {
                             player.x += platform[i].vx;
                             player.vx = platform[i].vx;
                         }
-				} else if (player.y - player.vy + player.height + platform[i].vy <= platform[i].y) {
+				} if (player.y - player.vy + player.height + platform[i].vy <= platform[i].y) {
 					player.y = platform[i].y - player.height;
 					player.vy = 0;
 					player.i = i;
@@ -965,7 +790,7 @@ function player_platform_collision_handler() {
                         player.vy = platform[i].vy;
                     }
                     //player.vx += platform[i].vx;
-				} else  {
+				} else if (player.y - player.vy + platform[i].vy >= platform[i].y + platform[i].height) {
 					player.y = player.y - player.vy;//platform[i].y + platform[i].height;
 					player.vy = 0;
                     if (platform[i].vy > 0) {
@@ -1122,8 +947,17 @@ function draw() {
 		i++;
 	}
     i = 0;
+    ctx.fillStyle = 'blue';
     while (i < enemy2_list.length) {
         ctx.fillRect(enemy2_list[i].x, enemy2_list[i].y + r_y, enemy2_list[i].width, enemy2_list[i].height);
+        i++;
+    }
+    i = 0;
+    ctx.fillStyle = 'red';
+    while (i < enemy_projectile.length) {
+        //ctx.fillRect(enemy_projectile[i].x, enemy_projectile[i].y + r_y, enemy_projectile.width, enemy_projectile.height);
+        ctx.fillRect(enemy_projectile[i].x, enemy_projectile[i].y + r_y, enemy_projectile[i].width, enemy_projectile[i].height);
+        //alert(enemy_projectile[i].x + " " + enemy_projectile[i].y);
         i++;
     }
 }
