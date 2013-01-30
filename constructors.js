@@ -62,6 +62,7 @@ function Enemy(x, y, width, i) {
 	this.vy = 0;
 	this.width = enemy_width;
 	this.height = enemy_height;
+	
 	this.img = new Image();
 	this.img.src = "enemy1_2.png";
 	this.si = 0; //left: 0-4, right: 5-9
@@ -95,6 +96,19 @@ function Enemy2(x, y, width, i) {
     this.i = i;
     this.lastFired = Math.random()*80;
     console.log('x');
+	
+	this.img = new Image();
+	this.img.src = "enemy1_3.png";
+	this.si = 0; //left: 0-4, right: 5-9
+	this.sright = 4;
+	this.sleft = 9;
+	this.sdelay = 0;
+	this.smax = 3;
+	
+	this.sx = [0,40,80,115,150, 490,525,565,605,640];
+	this.sy = [0];
+	this.sWidth = [35,30,30,30,30, 30,35,30,30,30];
+	
 }
 
 function Explosion(x,y) {

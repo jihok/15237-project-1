@@ -68,8 +68,8 @@ var enemy_width = 30;
 var enemy_speed = 0.3;
 
 //enemy type 2 constants
-var enemy2_height = 10;
-var enemy2_width = 10;
+var enemy2_height = 40;
+var enemy2_width = 30;
 var enemy2_speed = .22;
 var enemy2_fire_rate = 60;
 
