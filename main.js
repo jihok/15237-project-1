@@ -11,13 +11,14 @@ function enemy_init() {
 }
 
 function enemy2_init() {
+	if(game_state>1) {
     var i = 1;
     while (i < platform.length) {
         if (platform[i].y < 390) {
             enemy2_list.push(new Enemy2(platform[i].x, platform[i].y, platform[i].width, i));
         }
         i += 2;
-    }
+    } }
 }
 
 function enemy_fire() {
