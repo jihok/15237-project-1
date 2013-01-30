@@ -493,6 +493,10 @@ function update() {
 	if (game_state === 3) {
 		clearInterval(intervalId);
 		ctx.fillRect(0,0,400,500);
+		ctx.fillStyle = "white";
+		ctx.font = "60px Arial";
+		ctx.textAlign = "center";
+		ctx.fillText("GAME BEAT",200,200);
 	}
 }
 
