@@ -49,6 +49,11 @@ function onKeyDown(event) {
 		clearInterval(intervalId);
 		init();
 	}
+	else if (event.keyCode === 51) {
+		game_state = 3;
+		clearInterval(intervalId);
+		init();
+	}
 }
 
 function onKeyUp(event) {
@@ -63,16 +68,21 @@ function onKeyUp(event) {
 function onMouseDown(event) {
 	if(game_state === 0) {
 		if(event.pageX >= 125 && event.pageX <= 295) {
+			//start
 			if(event.pageY >= 250 && event.pageY <= 300) {
 				clearInterval(intervalId);
 				game_state = 1;
 				init();
 			}
+
+			//controls
 			if(event.pageY >= 310 && event.pageY <= 360) {
 				clearInterval(intervalId);
 				game_state = 1;
 				init();
 			}
+
+			//credits
 			if(event.pageY >= 370 && event.pageY <= 420) {
 				clearInterval(intervalId);
 				game_state = 1;

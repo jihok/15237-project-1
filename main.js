@@ -592,31 +592,26 @@ function level_end_init() {
 
 //creates our platform objects, hardcoded as of now
 function platform_init() {
-	if(game_state <= 1) {
-		platform.push(new Platform(0, 400, 400, 0, 0));
+	platform.push(new Platform(0, 400, 400, 0, 0));
 
-		var plat_num = 0;
-		var plat_y = 400;
-		var plat_x = Math.floor(Math.random()*300);
-		while (plat_num < 10) {
-			var next_plat_y = Math.floor(Math.random()*30) + 40;
-			plat_y -= next_plat_y;
-            horiz = Math.min(canvas.width - (plat_x + 200), Math.min(plat_x, Math.random() * 300));
-            if (horiz < 5) {
-                horiz = 0;
-            }
-			platform.push(new Platform(plat_x, plat_y, 100, horiz, 0));
-			var next_plat_x = Math.floor(Math.random()*150);
-			if(plat_num % 2 === 1)
-				next_plat_x += 150;
-			plat_x = next_plat_x;
-			if (plat_x > 300 || plat_x < 0)
-				plat_x = Math.floor(Math.random()*200) + Math.floor(Math.random()*100);
-			plat_num++;
-		}
-	}
-	if(game_state === 2) {
-		platform.push(new Platform(0, 400, 400, 0, 0));
+	var plat_num = 0;
+	var plat_y = 400;
+	var plat_x = Math.floor(Math.random()*300);
+	while (plat_num < 10) {
+		var next_plat_y = Math.floor(Math.random()*30) + 40;
+		plat_y -= next_plat_y;
+        horiz = Math.min(canvas.width - (plat_x + 200), Math.min(plat_x, Math.random() * 300));
+        if (horiz < 5) {
+            horiz = 0;
+        }
+		platform.push(new Platform(plat_x, plat_y, 100, horiz, 0));
+		var next_plat_x = Math.floor(Math.random()*150);
+		if(plat_num % 2 === 1)
+			next_plat_x += 150;
+		plat_x = next_plat_x;
+		if (plat_x > 300 || plat_x < 0)
+			plat_x = Math.floor(Math.random()*200) + Math.floor(Math.random()*100);
+		plat_num++;
 	}
 }
 
@@ -726,16 +721,14 @@ function update() {
 	draw();
 	if(game_state === 0) {
 		clearInterval(intervalId);
-		ctx.fillStyle = "black";
-		ctx.fillRect(0,0,400,500);
+		title_img.src = "title.jpg";
+		ctx.drawImage(title_img,0,0,400,500);
 		ctx.strokeStyle = "white";
 		ctx.strokeRect(115,240,170,50);
 		ctx.strokeRect(115,300,170,50);
 		ctx.strokeRect(115,360,170,50);
 		ctx.fillStyle = "white";
-		ctx.font = "60px Arial";
 		ctx.textAlign = "center";
-		ctx.fillText("Project 1",200,150);
 		ctx.font = "40px Arial";
 		ctx.fillText("Start",200,280);
 		ctx.fillText("Controls",200,340);
@@ -764,6 +757,10 @@ function update() {
 		ctx.fillText("O V E R",200,270);
 		ctx.font = "30px Arial";
 		ctx.fillText("Press 'r' to restart",200,350);
+	}
+	if (game_state === 3) {
+		clearInterval(intervalId);
+		ctx.fillRect(0,0,400,500);
 	}
 }
 
