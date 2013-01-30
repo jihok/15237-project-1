@@ -58,6 +58,7 @@ var y_diff = 0;
 var level_end = new Object();
 var game_state = 0;
 var title_img = new Image();
+var control_img = new Image();
 //var power_jump = false;
 
 //enemy constants

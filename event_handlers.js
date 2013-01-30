@@ -81,8 +81,19 @@ function onMouseDown(event) {
 				if(event.pageY >= 310 && event.pageY <= 360) {
 					clearInterval(intervalId);
 					control_flag = true;
-					ctx.fillStyle = "black";
-					ctx.fillRect(0,0,400,500);
+					control_img.src = "control.jpg";
+					ctx.drawImage(control_img,0,0,400,500);
+					ctx.font = "30px Arial";
+					ctx.fillText("W = Jump",300,80);
+					ctx.fillText("A = Left",300,110);
+					ctx.fillText("D = Right",300,140);
+					ctx.fillText("Left Click",300,240);
+					ctx.fillText("to shoot",300,280);
+					ctx.fillText("Utilize your gun's recoil",200,390);
+					ctx.fillText(" to double jump or run faster!",200,420);
+					ctx.textAlign = "center";
+					ctx.font = "20px Arial";
+					ctx.fillText("(Click anywhere to return to the title screen)",200,450);
 				}
 
 				//credits
@@ -91,6 +102,14 @@ function onMouseDown(event) {
 					credit_flag = true;
 					ctx.fillStyle = "black";
 					ctx.fillRect(0,0,400,500);
+					ctx.fillStyle = "white";
+					ctx.textAlign = "center";
+					ctx.font = "40px Arial";
+					ctx.fillText("Norbert Chu, nchu",200,200);
+					ctx.fillText("Jiho Kim, jihok",200,250);
+					ctx.fillText("Deanna Zhu, dzw",200,300);
+					ctx.font = "20px Arial";
+					ctx.fillText("(Click anywhere to return to the title screen)",200,450);
 				}
 			}
 		}
