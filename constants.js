@@ -39,9 +39,10 @@ var projectile_height = 10;
 var projectile_width = 10;
 var projectile_speed = 4;
 var explosion_diameter = 20;
-var recoil = 0.24; //this is how much velocity the rocket imparts on the player in the opposite direction.
-var threshold_up = 60;
+var recoil = 0.18; //this is how much velocity the rocket imparts on the player in the opposite direction.
+var threshold_up = 80;
 var threshold_down = 360;
+
 var r_y = 0;
 var death_flag = false;
 var victory_flag = false;
