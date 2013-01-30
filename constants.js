@@ -67,4 +67,4 @@ var enemy2_width = 10;
 var enemy2_speed = .22;
 var enemy2_fire_rate = 60;
 
-var enemy_projectile_speed = 2;     
+var enemy_projectile_speed = 2;
